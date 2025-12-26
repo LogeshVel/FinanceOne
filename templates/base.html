@@ -43,13 +43,20 @@
             .material-symbols-outlined {
                 font-size: 24px;
             }
+        }
     </style>
 </head>
 
 <body class="flex h-screen w-full overflow-hidden bg-[#101922]">
 
+    <!-- Mobile Overlay -->
+    <div id="sidebar-overlay"
+        class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity opacity-0 lg:hidden"
+        onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside class="hidden lg:flex flex-col w-72 h-full border-r border-[#223649] bg-[#101922] flex-shrink-0">
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 z-50 w-72 h-full border-r border-[#223649] bg-[#101922] flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static">
         <div class="flex flex-col h-full p-4 justify-between">
             <div class="flex flex-col gap-6">
                 <!-- Logo -->
@@ -122,8 +129,14 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         <!-- Header -->
         <header
-            class="h-16 flex lg:hidden items-center justify-between px-6 lg:px-10 border-b border-[#223649] bg-[#101922]/80 backdrop-blur-md sticky top-0 z-30">
-            <span class="font-bold text-lg lg:hidden">Financial One</span>
+            class="h-16 flex lg:hidden items-center justify-between px-4 border-b border-[#223649] bg-[#101922]/80 backdrop-blur-md sticky top-0 z-30">
+            <div class="flex items-center gap-3">
+                <button id="sidebar-toggle"
+                    class="p-2 -ml-2 text-[#90adcb] hover:text-white rounded-lg hover:bg-white/5 transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <span class="font-bold text-lg text-white">Financial One</span>
+            </div>
 
             <!-- Empty Header Right -->
             <div></div>
@@ -136,6 +149,36 @@
         </div>
     </main>
 
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+
+            if (isClosed) {
+                // Open
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                // slight delay to allow display:block to apply
+                requestAnimationFrame(() => {
+                    overlay.classList.remove('opacity-0');
+                });
+            } else {
+                // Close
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300); // match transition duration
+            }
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 
 </html>
