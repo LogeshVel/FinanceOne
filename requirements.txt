@@ -3,4 +3,4 @@ numpy
 Pillow
 whitenoise
 gunicorn
-psycopg[binary]
+psycopg2-binary
