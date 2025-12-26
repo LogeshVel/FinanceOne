@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
+        <div>
+            <h1 class="text-white text-3xl md:text-4xl font-black tracking-tight mb-2">Retirement Portfolio</h1>
+            <p class="text-[#90adcb] text-base">Track and manage your retirement assets and contributions.</p>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Total Corpus -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[#90adcb] text-sm font-medium uppercase tracking-wider">Total Corpus</span>
+                <span class="material-symbols-outlined text-[#223649] text-3xl">account_balance_wallet</span>
+            </div>
+            <div class="text-white text-4xl font-bold mb-3">₹{{ corpus|intcomma }}</div>
+            <div class="flex items-center gap-2">
+                <span
+                    class="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">trending_up</span> +{{ growth_pct }}%
+                </span>
+                <span class="text-[#90adcb] text-xs">avg. annual return</span>
+            </div>
+        </div>
+
+        <!-- Monthly Contribution -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[#90adcb] text-sm font-medium uppercase tracking-wider">Monthly Contribution</span>
+                <span class="material-symbols-outlined text-[#223649] text-3xl">savings</span>
+            </div>
+            <div class="text-white text-4xl font-bold mb-3">₹{{ total_contribution|intcomma }}</div>
+            <div class="flex items-center gap-2">
+                <span class="text-[#90adcb] text-xs">Total monthly savings towards retirement</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row: Table & Form -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- Asset List Table (Span 2) -->
+        <div class="xl:col-span-2 bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl overflow-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-white text-lg font-bold">Holdings</h3>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[#90adcb] text-xs uppercase border-b border-[#223649]">
+                            <th class="py-3 font-semibold">Asset / Provider</th>
+                            <th class="py-3 font-semibold">Type</th>
+                            <th class="py-3 font-semibold text-right">Contribution (Mo)</th>
+                            <th class="py-3 font-semibold text-right">Balance</th>
+                            <th class="py-3 font-semibold text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        {% for item in retirements %}
+                        <tr class="border-b border-[#223649]/50 hover:bg-[#223649]/30 transition-colors last:border-0">
+                            <td class="py-4 text-white font-medium">
+                                {{ item.provider }}
+                            </td>
+                            <td class="py-4 text-[#90adcb]">
+                                <span class="bg-[#223649] px-2 py-1 rounded text-xs text-white border border-[#586e82]">
+                                    {{ item.account_type }}</span>
+                            </td>
+                            <td class="py-4 text-white text-right">
+                                ₹{{ item.monthly_contribution|intcomma }}
+                            </td>
+                            <td class="py-4 text-white font-bold text-right">
+                                ₹{{ item.balance|intcomma }}
+                            </td>
+                            <td class="py-4 text-center">
+                                <a href="{% url 'delete_retirement' item.id %}"
+                                    onclick="return confirm('Are you sure you want to delete this retirement asset?')"
+                                    class="text-red-500 hover:text-red-400 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-8 text-center text-[#586e82]">
+                                No retirement assets found. Add one to get started.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Asset Form (Span 1) -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl h-fit">
+            <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-6">
+                <span class="material-symbols-outlined text-[#0d7ff2]">add_circle</span> Add Asset
+            </h3>
+            <form method="POST" class="flex flex-col gap-5">
+                {% csrf_token %}
+                <div class="space-y-1">
+                    <label class="text-[#90adcb] text-xs uppercase font-bold">Account Type</label>
+                    <select name="account_type"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all">
+                        <option value="NPS">NPS (National Pension System)</option>
+                        <option value="EPF">EPF (Employees' Provident Fund)</option>
+                        <option value="PPF">PPF (Public Provident Fund)</option>
+                        <option value="401(k)">401(k)</option>
+                        <option value="IRA">IRA (Individual Retirement Account)</option>
+                        <option value="Roth IRA">Roth IRA</option>
+                        <option value="Mutual Fund">Mutual Fund (Retirement)</option>
+                        <option value="FD">Fixed Deposit</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[#90adcb] text-xs uppercase font-bold">Provider / Name</label>
+                    <input type="text" name="provider" required
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                        placeholder="e.g. HDFC, Vanguard, Employer">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[#90adcb] text-xs uppercase font-bold">Current Balance</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                        <input type="number" name="balance" step="0.01" required
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                            placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[#90adcb] text-xs uppercase font-bold">Monthly Contribution</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                        <input type="number" name="monthly_contribution" step="0.01" required
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                            placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[#90adcb] text-xs uppercase font-bold">Expected Return (%)</label>
+                    <input type="number" name="return_rate" step="0.01" value="7.00" required
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-[#0d7ff2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg mt-2 transition-colors shadow-lg shadow-blue-500/20">
+                    Save Asset
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

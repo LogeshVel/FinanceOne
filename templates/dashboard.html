@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
+        <div>
+            <h1 class="text-white text-3xl md:text-4xl font-black tracking-tight mb-2">
+                Welcome back, {{ request.user.first_name|default:request.user.username }}
+            </h1>
+            <p class="text-[#90adcb] text-base">Here is your financial health summary for today.</p>
+        </div>
+        <!-- Button Removed -->
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Net Worth -->
+        <div class="xl:col-span-2 bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+            <div class="flex justify-between items-start mb-6">
+                <div class="w-full">
+                    <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Total Net Worth</p>
+
+                    <details class="group relative">
+                        <summary class="flex items-center gap-3 cursor-pointer list-none">
+                            <h3 class="text-white text-4xl font-bold tracking-tight">₹{{ net_worth|intcomma }}</h3>
+                            <span
+                                class="material-symbols-outlined text-[#90adcb] hover:text-white transition-transform group-open:rotate-180 text-3xl mt-1 select-none">expand_circle_down</span>
+                        </summary>
+
+                        <div
+                            class="mt-4 pt-4 space-y-2 text-sm text-[#90adcb] border-t border-[#223649] animate-fade-in-down">
+                            <div class="flex justify-between items-center rounded p-2 hover:bg-[#223649]/30">
+                                <span>Total Assets</span>
+                                <span class="font-bold text-white">₹{{ total_assets|intcomma }}</span>
+                            </div>
+                            <div class="flex justify-between items-center rounded p-2 hover:bg-[#223649]/30">
+                                <span>Retirement Corpus</span>
+                                <span class="font-bold text-white">₹{{ total_retirement|intcomma }}</span>
+                            </div>
+                            <div class="border-t border-[#223649] my-1"></div>
+                            <div class="flex justify-between items-center bg-[#223649]/50 rounded p-2">
+                                <span class="text-green-400 font-medium">Net Worth</span>
+                                <span class="font-bold text-green-400">₹{{ net_worth|intcomma }}</span>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Real Net Worth -->
+            <div class="mt-6 border-t border-[#223649] pt-6">
+                <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Real Net Worth</p>
+                <div class="flex items-center gap-2 mb-2">
+                    <h3 class="text-emerald-400 text-3xl font-bold tracking-tight">₹{{ real_net_worth|intcomma }}</h3>
+                    <div class="group relative">
+                        <span class="material-symbols-outlined text-[#586e82] text-sm cursor-help">info</span>
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-[#101922] border border-[#223649] rounded-lg p-3 text-xs text-[#90adcb] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl z-50">
+                            <div class="space-y-1">
+                                <div class="flex justify-between"><span>Assets:</span> <span class="text-white">
+                                        ₹{{total_assets|add:total_retirement|intcomma }}</span></div>
+                                <div class="flex justify-between text-red-400"><span>- Outstanding Loans:</span>
+                                    <span>₹{{ total_outstanding_loans|intcomma }}</span>
+                                </div>
+                                <div class="flex justify-between text-blue-400"><span>+ Property Value:</span>
+                                    <span>₹{{ total_resale_value|intcomma }}</span>
+                                </div>
+                                <div class="flex justify-between text-green-400"><span>+ Monthly Cashflow:</span>
+                                    <span>₹{{ monthly_cashflow|intcomma }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 text-xs text-[#586e82] flex flex-wrap gap-2">
+                    <span class="whitespace-nowrap">(Assets: ₹{{ total_assets|add:total_retirement|intcomma }})</span>
+                    <span>-</span>
+                    <span class="whitespace-nowrap">(Loans: ₹{{ total_outstanding_loans|intcomma }})</span>
+                    <span>+</span>
+                    <span class="whitespace-nowrap">(Property Value: ₹{{ total_resale_value|intcomma }})</span>
+                    <span>+</span>
+                    <span class="whitespace-nowrap">(Cashflow: ₹{{ monthly_cashflow|intcomma }})</span>
+                </div>
+            </div>
+
+            <!-- Removed Chart -->
+        </div>
+
+        <!-- Assets Allocation -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+            <div>
+                <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Assets Allocation</p>
+                <h3 class="text-white text-2xl font-bold">₹{{ total_assets|intcomma }}</h3>
+            </div>
+
+            <div class="h-48 flex items-center justify-center mt-4">
+                <canvas id="assetDoughnut"></canvas>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-4">
+                {% for label, val in zip_assets %}
+                <!-- This loop requires a template tag or zip in view to iterate both labels and values. 
+                     For simplicity, we handle legend via JS or just simple list if passed zipped. -->
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Income & Expense Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 xl:col-span-3">
+            <!-- Income Section -->
+            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current Year Income</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_current_income|intcomma }}</h2>
+                        <p class="text-[#586e82] text-xs">Annualized Projection</p>
+                    </div>
+                    <div class="h-32 w-32">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Section -->
+            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current Year Expense</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_current_expense|intcomma }}</h2>
+                        <p class="text-[#586e82] text-xs">Year to Date</p>
+                    </div>
+                    <div class="h-32 w-32">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loans & Insurance Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 xl:col-span-3">
+            <!-- Loans Section -->
+            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current year Total EMIs
+                </h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_annual_emi|intcomma }}</h2>
+                        <p class="text-[#586e82] text-xs">Annualized Obligation</p>
+                    </div>
+                    <div class="h-32 w-32">
+                        <canvas id="loanChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance Section -->
+            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current year Total
+                    Insurance Premium
+                </h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_annual_premium|intcomma }}</h2>
+                        <p class="text-[#586e82] text-xs">Annualized Premium</p>
+                    </div>
+                    <div class="h-32 w-32">
+                        <canvas id="insuranceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart Interaction
+        function updateChart(range) {
+            // Functionality removed as chart is removed
+        }
+
+        // Asset Doughnut
+        const ctxAsset = document.getElementById('assetDoughnut');
+        new Chart(ctxAsset, {
+            type: 'doughnut',
+            data: {
+                labels: {{ asset_labels| safe }},
+            datasets: [{
+                data: {{ asset_values| safe }},
+            backgroundColor: ['#3b82f6', '#8b5cf6', '#eab308', '#22c55e', '#ef4444'],
+            borderWidth: 0
+            }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#fff' }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+        // Income Doughnut
+        new Chart(document.getElementById('incomeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ income_chart_labels| safe }},
+            datasets: [{
+                data: {{ income_chart_values| safe }},
+            backgroundColor: ['#22c55e', '#3b82f6', '#8b5cf6', '#eab308'],
+            borderWidth: 0
+            }]
+        },
+            options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+
+        // Expense Doughnut
+        new Chart(document.getElementById('expenseChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ expense_chart_labels| safe }},
+            datasets: [{
+                data: {{ expense_chart_values| safe }},
+            backgroundColor: ['#ef4444', '#f97316', '#eab308', '#8b5cf6'],
+            borderWidth: 0
+            }]
+        },
+            options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+
+        // Loan Doughnut
+        new Chart(document.getElementById('loanChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ loan_chart_labels| safe }},
+            datasets: [{
+                data: {{ loan_chart_values| safe }},
+            backgroundColor: ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#6366f1'],
+            borderWidth: 0
+            }]
+        },
+            options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+
+        // Insurance Doughnut
+        new Chart(document.getElementById('insuranceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ insurance_chart_labels| safe }},
+            datasets: [{
+                data: {{ insurance_chart_values| safe }},
+            backgroundColor: ['#0ea5e9', '#06b6d4', '#14b8a6', '#10b981', '#84cc16'],
+            borderWidth: 0
+            }]
+        },
+            options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+    </script>
+    {% endblock %}

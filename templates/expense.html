@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-white mb-2">Expense History</h1>
+            <p class="text-[#90adcb]">Manage and track your monthly spending records.</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-blue-900/20 rounded-lg">
+                    <span class="material-symbols-outlined text-[#0d7ff2]">payments</span>
+                </div>
+            </div>
+            <p class="text-[#90adcb] text-sm font-medium mb-1">Total Spend</p>
+            <p class="text-2xl font-bold text-white">₹{{ current_year_total|intcomma }}</p>
+            <p class="text-[#586e82] text-xs mt-1">All-time: ₹{{ total_spend|intcomma }}</p>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-green-900/20 rounded-lg">
+                    <span class="material-symbols-outlined text-green-500">calendar_month</span>
+                </div>
+            </div>
+            <p class="text-[#90adcb] text-sm font-medium mb-1">Daily Average</p>
+            <p class="text-2xl font-bold text-white">₹{{ daily_avg|intcomma }}</p>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-purple-900/20 rounded-lg">
+                    <span class="material-symbols-outlined text-purple-500">trending_up</span>
+                </div>
+            </div>
+            <p class="text-[#90adcb] text-sm font-medium mb-1">Highest Category</p>
+            <p class="text-2xl font-bold text-white">{{ highest_category }}</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-4 text-sm">Yearly Expenses</h3>
+            <div class="h-64">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-4 text-sm">Monthly Expenses ({{ current_year }})</h3>
+            <div class="h-64">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Yearly Chart
+            const yearlyCtx = document.getElementById('yearlyChart').getContext('2d');
+            new Chart(yearlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ yearly_labels| safe }},
+            datasets: [{
+                label: 'Total Spend',
+                data: {{ yearly_values| safe }},
+            backgroundColor: '#0d7ff2',
+            borderRadius: 4,
+            barThickness: 30,
+                    }]
+                },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#223649' },
+                    ticks: { color: '#90adcb' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#90adcb' }
+                }
+            }
+        }
+            });
+
+        // Monthly Chart
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ monthly_labels| safe }},
+            datasets: [{
+                label: 'Monthly Spend',
+                data: {{ monthly_values| safe }},
+            backgroundColor: '#10b981',
+            borderRadius: 4,
+            barThickness: 20,
+                    }]
+                },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#223649' },
+                    ticks: { color: '#90adcb' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#90adcb' }
+                }
+            }
+        }
+            });
+        });
+    </script>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Expenses List -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            <div class="bg-[#1b2733] border border-[#223649] rounded-xl overflow-hidden">
+                <div
+                    class="p-4 border-b border-[#223649] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h3 class="text-white font-semibold">Transactions</h3>
+
+                    <!-- Filter Form -->
+                    <form method="get" class="flex gap-2">
+                        <select name="year"
+                            class="bg-[#101922] border border-[#223649] text-[#90adcb] text-sm rounded px-2 py-1 focus:outline-none focus:border-[#0d7ff2]">
+                            <option value="all">All Years</option>
+                            {% for year in available_years %}
+                            {% if selected_year == year %}
+                            <option value="{{ year }}" selected>{{ year }}</option>
+                            {% else %}
+                            <option value="{{ year }}">{{ year }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+
+                        <select name="month"
+                            class="bg-[#101922] border border-[#223649] text-[#90adcb] text-sm rounded px-2 py-1 focus:outline-none focus:border-[#0d7ff2]">
+                            <option value="all">All Months</option>
+
+                            {% if selected_month == 1 %}
+                            <option value="1" selected>January</option>
+                            {% else %}
+                            <option value="1">January</option>
+                            {% endif %}
+
+                            {% if selected_month == 2 %}
+                            <option value="2" selected>February</option>
+                            {% else %}
+                            <option value="2">February</option>
+                            {% endif %}
+
+                            {% if selected_month == 3 %}
+                            <option value="3" selected>March</option>
+                            {% else %}
+                            <option value="3">March</option>
+                            {% endif %}
+
+                            {% if selected_month == 4 %}
+                            <option value="4" selected>April</option>
+                            {% else %}
+                            <option value="4">April</option>
+                            {% endif %}
+
+                            {% if selected_month == 5 %}
+                            <option value="5" selected>May</option>
+                            {% else %}
+                            <option value="5">May</option>
+                            {% endif %}
+
+                            {% if selected_month == 6 %}
+                            <option value="6" selected>June</option>
+                            {% else %}
+                            <option value="6">June</option>
+                            {% endif %}
+
+                            {% if selected_month == 7 %}
+                            <option value="7" selected>July</option>
+                            {% else %}
+                            <option value="7">July</option>
+                            {% endif %}
+
+                            {% if selected_month == 8 %}
+                            <option value="8" selected>August</option>
+                            {% else %}
+                            <option value="8">August</option>
+                            {% endif %}
+
+                            {% if selected_month == 9 %}
+                            <option value="9" selected>September</option>
+                            {% else %}
+                            <option value="9">September</option>
+                            {% endif %}
+
+                            {% if selected_month == 10 %}
+                            <option value="10" selected>October</option>
+                            {% else %}
+                            <option value="10">October</option>
+                            {% endif %}
+
+                            {% if selected_month == 11 %}
+                            <option value="11" selected>November</option>
+                            {% else %}
+                            <option value="11">November</option>
+                            {% endif %}
+
+                            {% if selected_month == 12 %}
+                            <option value="12" selected>December</option>
+                            {% else %}
+                            <option value="12">December</option>
+                            {% endif %}
+                        </select>
+
+                        <button type="submit"
+                            class="bg-[#223649] hover:bg-[#2d445b] text-white px-3 py-1 rounded text-sm transition-colors">
+                            Filter
+                        </button>
+                        {% if selected_year or selected_month %}
+                        <a href="{% url 'expense' %}"
+                            class="text-[#0d7ff2] hover:text-blue-400 text-sm flex items-center">Reset</a>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#101922] border-b border-[#223649]">
+                                <th class="p-4 text-[#90adcb] font-medium text-sm">Transaction</th>
+                                <th class="p-4 text-[#90adcb] font-medium text-sm">Category</th>
+                                <th class="p-4 text-[#90adcb] font-medium text-sm">Date</th>
+                                <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Amount</th>
+                                <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expenses %}
+                            <tr
+                                class="border-b border-[#223649] hover:bg-[#101922]/50 cursor-pointer group transition-colors">
+                                <td class="p-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="w-10 h-10 bg-[#223649] rounded-full flex items-center justify-center text-[#90adcb]">
+                                            <span class="material-symbols-outlined text-lg">receipt_long</span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-white">{{ expense.description }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#223649] text-[#90adcb]">
+                                        {{ expense.category }}
+                                    </span>
+                                </td>
+                                <td class="p-4 text-sm text-[#90adcb]">
+                                    {{ expense.date }}
+                                </td>
+                                <td class="p-4 text-right text-sm font-bold text-white">
+                                    -₹{{ expense.amount|intcomma }}
+                                </td>
+                                <td class="p-4 text-center">
+                                    <a href="{% url 'delete_expense' expense.id %}"
+                                        onclick="return confirm('Are you sure you want to delete this expense?')"
+                                        class="text-red-500 hover:text-red-400 transition-colors">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="p-8 text-center text-[#90adcb]">No expenses found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Add Panel -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24 bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+                <h3 class="text-lg font-bold text-white mb-1">Quick Add</h3>
+                <p class="text-sm text-[#90adcb] mb-6">Record a new expense instantly.</p>
+                <form method="POST" action="{% url 'expense' %}" class="flex flex-col gap-4">
+                    {% csrf_token %}
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Amount</label>
+                        <input type="number" step="0.01" name="amount"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            required placeholder="0.00">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Description</label>
+                        <input type="text" name="description"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            required placeholder="e.g. Lunch">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Category</label>
+                        <select name="category"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
+                            <option value="Groceries">Groceries</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Dining">Dining</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Date</label>
+                        <input type="date" name="date"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            required>
+                    </div>
+                    <button type="submit"
+                        class="mt-4 w-full bg-[#0d7ff2] hover:bg-blue-600 text-white py-2 rounded-md transition-colors font-medium">
+                        Save Expense
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

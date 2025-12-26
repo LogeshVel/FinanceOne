@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-white mb-2">Assets Portfolio</h1>
+            <p class="text-[#90adcb]">Track and manage your investment portfolio.</p>
+        </div>
+        <button onclick="document.getElementById('assetModal').showModal()"
+            class="bg-[#0d7ff2] hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
+            <span class="material-symbols-outlined text-[20px]">add</span>
+            Add Asset
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <p class="text-[#90adcb] text-sm font-medium mb-2">Total Value</p>
+            <p class="text-white text-2xl font-bold">₹{{ total_value|intcomma }}</p>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <p class="text-[#90adcb] text-sm font-medium mb-2">Total Invested</p>
+            <p class="text-white text-2xl font-bold">₹{{ total_invested|intcomma }}</p>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <p class="text-[#90adcb] text-sm font-medium mb-2">Total P/L</p>
+            <p
+                class="text-2xl font-bold flex items-center gap-2 {% if total_pl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                <span class="material-symbols-outlined text-[20px]">
+                    {% if total_pl >= 0 %}
+                    trending_up
+                    {% else %}
+                    trending_down
+                    {% endif %}
+                </span>
+                ₹{{ total_pl_abs|intcomma }}
+            </p>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <p class="text-[#90adcb] text-sm font-medium mb-2">Return %</p>
+            <p class="text-2xl font-bold {% if pl_percent >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                {% if pl_percent >= 0 %}+{% endif %}{{ pl_percent }}%
+            </p>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Asset Table -->
+        <div class="lg:col-span-2 bg-[#1b2733] border border-[#223649] rounded-xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-[#223649]">
+                <h3 class="text-white font-semibold">Holdings</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-[#101922] border-b border-[#223649]">
+                            <th class="p-4 text-[#90adcb] font-medium text-sm">Asset</th>
+                            <th class="p-4 text-[#90adcb] font-medium text-sm">Type</th>
+                            <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Qty</th>
+                            <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Current</th>
+                            <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Value</th>
+                            <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        <tr class="border-b border-[#223649] hover:bg-[#101922]/50 group transition-colors">
+                            <td class="p-4">
+                                <p class="text-white font-medium">{{ asset.name }}</p>
+                                {% if asset.ticker %}<p class="text-[#586e82] text-xs">{{ asset.ticker }}</p>{% endif %}
+                            </td>
+                            <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-[#223649] text-[#90adcb]">
+                                    {{ asset.type }}</span></td>
+                            <td class="p-4 text-white text-right">{{ asset.quantity }}</td>
+                            <td class="p-4 text-white text-right">₹{{ asset.current_price|intcomma }}</td>
+                            <td class="p-4 text-white text-right font-medium">₹{{ asset.total_val|intcomma }}</td>
+                            <td class="p-4 text-center">
+                                <a href="{% url 'delete_asset' asset.id %}"
+                                    onclick="return confirm('Are you sure you want to delete this asset?')"
+                                    class="text-red-500 hover:text-red-400 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-[#90adcb]">No assets found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Allocation Chart -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-4">Allocation</h3>
+            <div class="h-48 flex items-center justify-center">
+                <canvas id="assetPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<dialog id="assetModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
+    <div class="bg-[#1b2733] border border-[#223649] text-white rounded-xl shadow-2xl p-6">
+        <h2 class="text-xl font-bold mb-4">Add New Asset</h2>
+        <form method="POST" action="{% url 'assets' %}" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <div class="flex flex-col gap-2">
+                <label class="text-[#90adcb] text-sm">Asset Name</label>
+                <input name="name"
+                    class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                    required placeholder="e.g. Apple Inc.">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#90adcb] text-sm">Type</label>
+                    <select name="type"
+                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
+                        <option>Stock</option>
+                        <option>Crypto</option>
+                        <option>Real Estate</option>
+                        <option>Gold</option>
+                        <option>Mutual Fund</option>
+                        <option>Bonds</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#90adcb] text-sm">Ticker</label>
+                    <input name="ticker"
+                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        placeholder="AAPL">
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="text-[#90adcb] text-sm">Quantity</label>
+                <input type="number" step="0.0001" name="quantity"
+                    class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                    required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#90adcb] text-sm">Buy Price</label>
+                    <input type="number" step="0.01" name="buy_price"
+                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        required>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#90adcb] text-sm">Current Price</label>
+                    <input type="number" step="0.01" name="current_price"
+                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        required>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="document.getElementById('assetModal').close()"
+                    class="flex-1 border border-[#223649] text-white hover:bg-[#223649] py-2 rounded-md transition-colors">Cancel</button>
+                <button type="submit"
+                    class="flex-1 bg-[#0d7ff2] hover:bg-blue-600 text-white py-2 rounded-md transition-colors">Save
+                    Asset</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+    const ctx = document.getElementById('assetPieChart');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            data: {{ chart_values| safe }},
+        backgroundColor: ['#3b82f6', '#8b5cf6', '#eab308', '#22c55e', '#ef4444'],
+        borderWidth: 0
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: '#fff', boxWidth: 10, padding: 20 }
+            }
+        },
+        cutout: '70%'
+    }
+    });
+</script>
+{% endblock %}
