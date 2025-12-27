@@ -45,3 +45,53 @@ class Budget(models.Model):
         self.yearly_income = other_budget.yearly_income
         self.annual_costs = other_budget.annual_costs
         self.save()
+
+class FinancialGoal(models.Model):
+    GOAL_TYPES = [
+        ('IMMEDIATE', 'Immediate (0-12 Months)'),
+        ('SHORT', 'Short-Term (1-3 Years)'),
+        ('MEDIUM', 'Medium-Term (3-7 Years)'),
+        ('LONG', 'Long-Term (7+ Years)'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goals')
+    category = models.CharField(max_length=20, choices=GOAL_TYPES, default='SHORT')
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, help_text="Why do I want it?")
+    target_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    target_date = models.DateField()
+    funding_strategy = models.TextField(blank=True, help_text="How will I fund it?")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.name} ({self.get_category_display()})"
+
+    @property
+    def progress_percentage(self):
+        if self.target_amount > 0:
+            percent = (self.current_amount / self.target_amount) * 100
+            return min(percent, 100)
+        return 0
+
+    @property
+    def status(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        
+        # 1. Check Completed
+        if self.current_amount >= self.target_amount:
+            return 'COMPLETED'
+            
+        # 2. Check Overdue
+        if self.target_date < today:
+            return 'OVERDUE'
+            
+        # 3. Check New (Created within last 3 days and 0 savings)
+        delta = today - self.created_at.date()
+        if delta.days <= 3 and self.current_amount == 0:
+            return 'NEW'
+            
+        # 4. Default
+        return 'IN_PROGRESS'

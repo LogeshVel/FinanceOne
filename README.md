@@ -1,8 +1,6 @@
 # FinancialOne
 
-FinancialOne is a comprehensive personal finance dashboard that helps you track your net worth, income, expenses, assets, loans, and retirement planning.
-
-**Note**: This project has been migrated from a React/FastAPI stack to a unified **Django Monolithic Application**.
+FinancialOne is a comprehensive personal finance dashboard that helps you track your net worth, budgeting, goals, income, expenses, assets, loans, and retirement planning.
 
 ## Tech Stack
 
@@ -14,6 +12,15 @@ FinancialOne is a comprehensive personal finance dashboard that helps you track 
 
 - **Dashboard**: Real-time overview of Net Worth, Asset Allocation, and Financial Projections.
     - **Real Net Worth**: Calculated as `Assets + Retirement - Outstanding Loans + Property Resale Value + Monthly Cashflow`.
+- **Budget Planner**: Comprehensive budgeting tool.
+    - **Active/Inactive Budgets**: Create multiple scenarios and activate one.
+    - **Monthly & Yearly Views**: Track recurring expenses and annual costs separately.
+    - **Copy Functionality**: Clone existing budgets to save time.
+    - **Analytics**: "Income vs Expense" visualization.
+- **Financial Goals**: Goal setting and tracking.
+    - **Categorized Goals**: Immediate, Short, Medium, and Long-term horizons.
+    - **Smart Status**: Auto-calculated statuses (New, In Progress, Completed, Overdue).
+    - **Visualization**: **Progress bars** and cards with dynamic funding strategies.
 - **Income & Expense**:
     - Detailed transaction logging.
     - **Analytics**: Year-wise and Month-wise bar charts for expenses.

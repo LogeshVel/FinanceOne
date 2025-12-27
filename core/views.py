@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from finance.models import Asset, Retirement, Income, Expense, Loan, Insurance
-from .models import Budget
+from .models import Budget, FinancialGoal
 from .utils import calculate_projections, calculate_loan_outstanding
 from datetime import datetime
-from .forms import UserRegistrationForm, BudgetCreationForm
+from .forms import UserRegistrationForm, BudgetCreationForm, FinancialGoalForm
 from datetime import datetime, timezone
 import calendar
 
@@ -709,4 +709,39 @@ def get_budget_details(request, id):
         'yearly_balance': y_income - y_total
     }
     return JsonResponse(data)
+
+@login_required
+def delete_goal(request, id):
+    goal = get_object_or_404(FinancialGoal, id=id, user=request.user)
+    goal.delete()
+    return redirect('goals')
+
+@login_required
+def goals_page(request):
+    if request.method == 'POST':
+        goal_id = request.POST.get('goal_id')
+        if goal_id:
+            goal = get_object_or_404(FinancialGoal, id=goal_id, user=request.user)
+            form = FinancialGoalForm(request.POST, instance=goal)
+        else:
+            form = FinancialGoalForm(request.POST)
+            
+        if form.is_valid():
+            goal = form.save(commit=False)
+            goal.user = request.user
+            goal.save()
+            return redirect('goals')
+    else:
+        form = FinancialGoalForm()
+    
+    goals = FinancialGoal.objects.filter(user=request.user).order_by('target_date')
+    
+    context = {
+        'immediate_goals': goals.filter(category='IMMEDIATE'),
+        'short_goals': goals.filter(category='SHORT'),
+        'medium_goals': goals.filter(category='MEDIUM'),
+        'long_goals': goals.filter(category='LONG'),
+        'form': form
+    }
+    return render(request, 'goals.html', context)
 

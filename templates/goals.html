@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Financial Goals</h1>
+            <p class="text-[#90adcb]">Define and track your financial objectives across different time horizons.</p>
+        </div>
+        <button onclick="openGoalModal()"
+            class="px-6 py-3 rounded-lg bg-[#0d7ff2] text-white hover:bg-[#0b6bcb] transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined">add</span>
+            Add Goal
+        </button>
+    </div>
+
+    <!-- Goals Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Immediate Goals (0-1y) -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-[#223649] pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Immediate Goals</h3>
+                    <p class="text-xs text-[#90adcb]">0-12 Months • Stability & Control</p>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-500 text-sm">bolt</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                {% for goal in immediate_goals %}
+                {% include 'goal_card.html' with goal=goal color='blue' %}
+                {% empty %}
+                <p class="text-[#90adcb] text-sm text-center py-4">No immediate goals yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Short-Term Goals (1-3y) -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-[#223649] pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Short-Term Goals</h3>
+                    <p class="text-xs text-[#90adcb]">1-3 Years • Lifestyle & Skills</p>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-500 text-sm">flight</span>
+                </div>
+            </div>
+            <div class="space-y-4">
+                {% for goal in short_goals %}
+                {% include 'goal_card.html' with goal=goal color='green' %}
+                {% empty %}
+                <p class="text-[#90adcb] text-sm text-center py-4">No short-term goals yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Medium-Term Goals (3-7y) -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-[#223649] pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Medium-Term Goals</h3>
+                    <p class="text-xs text-[#90adcb]">3-7 Years • Asset Building</p>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-yellow-500 text-sm">home</span>
+                </div>
+            </div>
+            <div class="space-y-4">
+                {% for goal in medium_goals %}
+                {% include 'goal_card.html' with goal=goal color='yellow' %}
+                {% empty %}
+                <p class="text-[#90adcb] text-sm text-center py-4">No medium-term goals yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Long-Term Goals (7+y) -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-[#223649] pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Long-Term Goals</h3>
+                    <p class="text-xs text-[#90adcb]">7+ Years • Wealth & Freedom</p>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-500 text-sm">savings</span>
+                </div>
+            </div>
+            <div class="space-y-4">
+                {% for goal in long_goals %}
+                {% include 'goal_card.html' with goal=goal color='purple' %}
+                {% empty %}
+                <p class="text-[#90adcb] text-sm text-center py-4">No long-term goals yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div id="goalModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 id="modalTitle" class="text-xl font-bold text-white">Add New Goal</h3>
+            <button onclick="closeGoalModal()" class="text-[#90adcb] hover:text-white"><span
+                    class="material-symbols-outlined">close</span></button>
+        </div>
+        <form method="POST" class="flex flex-col gap-4" id="goalForm">
+            {% csrf_token %}
+            <input type="hidden" name="goal_id" id="goal_id">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-[#90adcb]">Category</label>
+                    {{ form.category }}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-[#90adcb]">Goal Name</label>
+                    {{ form.name }}
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Why do I want it? (Description)</label>
+                {{ form.description }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-[#90adcb]">Target Amount (₹)</label>
+                    {{ form.target_amount }}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-[#90adcb]">Current Savings (₹)</label>
+                    {{ form.current_amount }}
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Target Date</label>
+                {{ form.target_date }}
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Funding Strategy</label>
+                {{ form.funding_strategy }}
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeGoalModal()"
+                    class="flex-1 px-4 py-2 rounded-lg bg-[#223649] text-white">Cancel</button>
+                <button type="submit" id="submitBtn" class="flex-1 px-4 py-2 rounded-lg bg-[#0d7ff2] text-white">Create
+                    Goal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openGoalModal(goal = null) {
+        const modal = document.getElementById('goalModal');
+        const title = document.getElementById('modalTitle');
+        const btn = document.getElementById('submitBtn');
+        const form = document.getElementById('goalForm');
+
+        modal.classList.remove('hidden');
+
+        if (goal) {
+            // Edit Mode
+            title.textContent = 'Edit Goal';
+            btn.textContent = 'Update Goal';
+            document.getElementById('goal_id').value = goal.id;
+
+            // Populate fields
+            // Use querySelector to matches Django's rendered output (usually id_field)
+            document.querySelector('[name="category"]').value = goal.category;
+            document.querySelector('[name="name"]').value = goal.name;
+            document.querySelector('[name="description"]').value = goal.description;
+            document.querySelector('[name="target_amount"]').value = goal.target_amount;
+            document.querySelector('[name="current_amount"]').value = goal.current_amount;
+
+            // Date handling
+            if (goal.target_date) {
+                // Format date if needed, standard input date expects YYYY-MM-DD
+                // Assuming goal.target_date comes as string or we format it passed in
+                document.querySelector('[name="target_date"]').value = goal.target_date;
+            }
+
+            document.querySelector('[name="funding_strategy"]').value = goal.funding_strategy;
+
+        } else {
+            // Create Mode
+            title.textContent = 'Add New Goal';
+            btn.textContent = 'Create Goal';
+            document.getElementById('goal_id').value = '';
+            form.reset();
+        }
+    }
+
+    function closeGoalModal() {
+        document.getElementById('goalModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}
