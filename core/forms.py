@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Budget
 
 class UserRegistrationForm(forms.ModelForm):
     first_name = forms.CharField(max_length=150, required=True, widget=forms.TextInput(attrs={
@@ -42,3 +42,39 @@ class UserRegistrationForm(forms.ModelForm):
             user.save()
             UserProfile.objects.create(user=user, currency=self.cleaned_data['currency'])
         return user
+
+class BudgetCreationForm(forms.ModelForm):
+    copy_from = forms.ModelChoiceField(
+        queryset=Budget.objects.none(),
+        required=False,
+        empty_label="Start from Scratch",
+        label="Copy from existing budget"
+    )
+
+    class Meta:
+        model = Budget
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
+        }
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['copy_from'].queryset = Budget.objects.filter(user=user).order_by('-updated_at')
+        self.fields['copy_from'].widget.attrs.update({'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'})
+
+class MonthlyBudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['monthly_income']
+        widgets = {
+            'monthly_income': forms.NumberInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'}),
+        }
+
+class YearlyBudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['yearly_income']
+        widgets = {
+            'yearly_income': forms.NumberInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'}),
+        }

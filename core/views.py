@@ -1,12 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.urls import reverse
+import json
 from django.db.models import Sum
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from finance.models import Asset, Retirement, Income, Expense, Loan, Insurance
+from .models import Budget
 from .utils import calculate_projections, calculate_loan_outstanding
 from datetime import datetime
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, BudgetCreationForm
 from datetime import datetime, timezone
 import calendar
 
@@ -544,3 +548,165 @@ def delete_asset(request, id):
     except Asset.DoesNotExist:
         pass
     return redirect('assets')
+
+@login_required
+def budget_page(request):
+    user = request.user
+    
+    # Handle Budget Creation
+    if request.method == 'POST' and 'create_budget' in request.POST:
+        form = BudgetCreationForm(user, request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.user = user
+            budget.save()
+            
+            # Handle Copy/Clone
+            copy_from_id = request.POST.get('copy_from')
+            if copy_from_id:
+                try:
+                    source_budget = Budget.objects.get(id=copy_from_id, user=user)
+                    budget.copy_from(source_budget)
+                except Budget.DoesNotExist:
+                    pass
+            
+            budget.activate()
+            # Redirect to Monthly Edit Mode
+            return redirect(f"{reverse('budget')}?mode=edit_monthly")
+
+    # Handle Budget Updates (Monthly/Yearly)
+    active_budget = Budget.objects.filter(user=user, is_active=True).first()
+    
+    if request.method == 'POST' and active_budget:
+        if 'update_monthly' in request.POST:
+            active_budget.monthly_income = request.POST.get('monthly_income', 0)
+            
+            # Process Dynamic Fields
+            # Helper to extract key-value pairs from POST starting with specific prefix
+            def extract_pairs(prefix):
+                data = {}
+                keys = request.POST.getlist(f'{prefix}_key[]')
+                values = request.POST.getlist(f'{prefix}_value[]')
+                for k, v in zip(keys, values):
+                    if k and v:
+                        data[k] = float(v)
+                return data
+
+            active_budget.fixed_expenses = extract_pairs('fixed')
+            active_budget.variable_expenses = extract_pairs('variable')
+            active_budget.savings_investments = extract_pairs('savings')
+            active_budget.save()
+            # Redirect to Yearly Edit Mode
+            return redirect(f"{reverse('budget')}?mode=edit_yearly")
+
+        if 'update_yearly' in request.POST:
+            active_budget.yearly_income = request.POST.get('yearly_income', 0)
+            
+            def extract_pairs(prefix):
+                data = {}
+                keys = request.POST.getlist(f'{prefix}_key[]')
+                values = request.POST.getlist(f'{prefix}_value[]')
+                for k, v in zip(keys, values):
+                    if k and v:
+                        data[k] = float(v)
+                return data
+
+            active_budget.annual_costs = extract_pairs('annual')
+            active_budget.save()
+            return redirect('budget')
+
+
+    creation_form = BudgetCreationForm(user=user)
+    inactive_budgets = Budget.objects.filter(user=user, is_active=False).order_by('-updated_at')
+    
+    # Calculations for View
+    monthly_data = {}
+    yearly_data = {}
+    
+    if active_budget:
+        # Monthly Calc
+        m_income = float(active_budget.monthly_income)
+        m_fixed = sum(float(v) for v in active_budget.fixed_expenses.values())
+        m_variable = sum(float(v) for v in active_budget.variable_expenses.values())
+        m_savings = sum(float(v) for v in active_budget.savings_investments.values())
+        m_total_expense = m_fixed + m_variable + m_savings
+        m_balance = m_income - m_total_expense
+        
+        monthly_data = {
+            'income': m_income,
+            'fixed_total': m_fixed,
+            'variable_total': m_variable,
+            'savings_total': m_savings,
+            'total_expense': m_total_expense,
+            'balance': m_balance,
+            'is_surplus': m_balance > 0
+        }
+        
+        # Yearly Calc
+        y_income = float(active_budget.yearly_income)
+        # Yearly Expenses = Monthly Expenses * 12
+        y_monthly_expenses = (m_fixed + m_variable + m_savings) * 12
+        y_annual_costs = sum(float(v) for v in active_budget.annual_costs.values())
+        y_total_expense = y_monthly_expenses + y_annual_costs
+        y_balance = y_income - y_total_expense
+        
+        yearly_data = {
+            'income': y_income,
+            'monthly_expenses_annualized': y_monthly_expenses,
+            'annual_costs_total': y_annual_costs,
+            'total_expense': y_total_expense,
+            'balance': y_balance,
+            'is_surplus': y_balance > 0
+        }
+
+    context = {
+        'active_budget': active_budget,
+        'inactive_budgets': inactive_budgets,
+        'creation_form': creation_form,
+        'monthly_data': monthly_data,
+        'yearly_data': yearly_data,
+        'mode': request.GET.get('mode', '')
+    }
+    return render(request, 'budget.html', context)
+
+@login_required
+def activate_budget(request, id):
+    budget = get_object_or_404(Budget, id=id, user=request.user)
+    budget.activate()
+    return redirect('budget')
+
+@login_required
+def delete_budget(request, id):
+    budget = get_object_or_404(Budget, id=id, user=request.user)
+    budget.delete()
+    return redirect('budget')
+
+@login_required
+def get_budget_details(request, id):
+    budget = get_object_or_404(Budget, id=id, user=request.user)
+    
+    # Calculate Totals
+    m_fixed = sum(float(v) for v in budget.fixed_expenses.values())
+    m_variable = sum(float(v) for v in budget.variable_expenses.values())
+    m_savings = sum(float(v) for v in budget.savings_investments.values())
+    m_total = m_fixed + m_variable + m_savings
+    
+    y_income = float(budget.yearly_income)
+    y_annual_costs = sum(float(v) for v in budget.annual_costs.values())
+    y_total = (m_total * 12) + y_annual_costs
+    
+    data = {
+        'name': budget.name,
+        'monthly_income': float(budget.monthly_income),
+        'fixed_expenses': budget.fixed_expenses,
+        'variable_expenses': budget.variable_expenses,
+        'savings_investments': budget.savings_investments,
+        'yearly_income': y_income,
+        'annual_costs': budget.annual_costs,
+        'monthly_total': m_total,
+        'yearly_total': y_total,
+        'monthly_balance': float(budget.monthly_income) - m_total,
+        'yearly_balance': y_income - y_total
+    }
+    return JsonResponse(data)
+

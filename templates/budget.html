@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Budget - Financial One{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Budget Planner</h1>
+            {% if active_budget %}
+            <p class="text-[#90adcb]">Active: <span class="text-[#0d7ff2] font-semibold">{{ active_budget.name }}</span>
+            </p>
+            {% else %}
+            <p class="text-[#90adcb]">No active budget. Create one to get started.</p>
+            {% endif %}
+        </div>
+        <div class="flex gap-3">
+            <button onclick="openModal('inactiveModal')"
+                class="px-4 py-2 rounded-lg bg-[#1b2733] text-[#90adcb] hover:text-white border border-[#223649] transition-colors">
+                View Inactive
+            </button>
+            <button onclick="openModal('createModal')"
+                class="px-4 py-2 rounded-lg bg-[#0d7ff2] text-white hover:bg-[#0b6bcb] transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Create New Budget
+            </button>
+        </div>
+    </div>
+
+    {% if active_budget %}
+    <!-- Active Budget Display (Read-Only Tables) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Monthly Budget Table -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-[#223649] pb-4">
+                <h2 class="text-lg font-semibold text-white">Monthly Budget</h2>
+                <div class="flex gap-2">
+                    {% if monthly_data.is_surplus %}
+                    <span
+                        class="text-xs px-2 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded">Surplus</span>
+                    {% endif %}
+                    <button onclick="openModal('monthlyModal')"
+                        class="text-xs text-[#0d7ff2] hover:text-white flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">edit</span> Edit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Income Section -->
+            <div class="flex justify-between items-center py-2 border-b border-[#223649]/50">
+                <span class="text-[#90adcb]">Income</span>
+                <span class="text-white font-medium">₹{{ monthly_data.income|floatformat:2|intcomma }}</span>
+            </div>
+
+            <!-- Fixed Expenses Table -->
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium text-[#90adcb]">Fixed Expenses</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <tbody class="divide-y divide-[#223649]/50">
+                            {% for k, v in active_budget.fixed_expenses.items %}
+                            <tr>
+                                <td class="py-1 text-gray-300">{{ k }}</td>
+                                <td class="py-1 text-right text-white">₹{{ v|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="font-medium bg-[#101922]">
+                                <td class="py-1 pl-2 text-[#90adcb]">Total Fixed</td>
+                                <td class="py-1 pr-2 text-right text-white">₹
+                                    {{monthly_data.fixed_total|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Variable Expenses Table -->
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium text-[#90adcb]">Variable Expenses</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <tbody class="divide-y divide-[#223649]/50">
+                            {% for k, v in active_budget.variable_expenses.items %}
+                            <tr>
+                                <td class="py-1 text-gray-300">{{ k }}</td>
+                                <td class="py-1 text-right text-white">₹{{ v|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="font-medium bg-[#101922]">
+                                <td class="py-1 pl-2 text-[#90adcb]">Total Variable</td>
+                                <td class="py-1 pr-2 text-right text-white">₹
+                                    {{monthly_data.variable_total|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Savings Table -->
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium text-[#90adcb]">Savings & Investments</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <tbody class="divide-y divide-[#223649]/50">
+                            {% for k, v in active_budget.savings_investments.items %}
+                            <tr>
+                                <td class="py-1 text-gray-300">{{ k }}</td>
+                                <td class="py-1 text-right text-white">₹{{ v|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="font-medium bg-[#101922]">
+                                <td class="py-1 pl-2 text-[#90adcb]">Total Savings</td>
+                                <td class="py-1 pr-2 text-right text-white">₹
+                                    {{monthly_data.savings_total|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="mt-2 pt-4 border-t border-[#223649] flex justify-between items-center">
+                <div class="text-sm text-[#90adcb]">Monthly Balance</div>
+                <div
+                    class="text-xl font-bold {% if monthly_data.is_surplus %}text-green-500{% else %}text-red-500{% endif %}">
+                    ₹{{ monthly_data.balance|floatformat:2|intcomma }}
+                </div>
+            </div>
+
+            {% if monthly_data.is_surplus %}
+            <div class="text-xs text-[#90adcb] mt-2 bg-green-500/10 p-3 rounded-lg border border-green-500/20">
+                <span class="text-green-400 font-semibold">Surplus Available!</span> Consider allocating to Extra
+                Investments, Travel Fund, or Debt Prepayment.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Yearly Budget Table -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-[#223649] pb-4">
+                <h2 class="text-lg font-semibold text-white">Yearly Budget</h2>
+                <button onclick="openModal('yearlyModal')"
+                    class="text-xs text-[#0d7ff2] hover:text-white flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">edit</span> Edit
+                </button>
+            </div>
+
+            <!-- Income Section -->
+            <div class="flex justify-between items-center py-2 border-b border-[#223649]/50">
+                <span class="text-[#90adcb]">Total Income</span>
+                <span class="text-white font-medium">₹{{ yearly_data.income|floatformat:2|intcomma }}</span>
+            </div>
+
+            <div class="p-3 bg-[#101922] rounded-lg border border-[#223649] flex justify-between items-center">
+                <span class="text-sm text-[#90adcb]">Annualized Monthly Expenses</span>
+                <span class="text-white font-medium">₹
+                    {{yearly_data.monthly_expenses_annualized|floatformat:2|intcomma}}</span>
+            </div>
+
+            <!-- Annual Costs Table -->
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium text-[#90adcb]">Annual Costs (One-time)</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <tbody class="divide-y divide-[#223649]/50">
+                            {% for k, v in active_budget.annual_costs.items %}
+                            <tr>
+                                <td class="py-1 text-gray-300">{{ k }}</td>
+                                <td class="py-1 text-right text-white">₹{{ v|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="font-medium bg-[#101922]">
+                                <td class="py-1 pl-2 text-[#90adcb]">Total Annual Costs</td>
+                                <td class="py-1 pr-2 text-right text-white">₹
+                                    {{yearly_data.annual_costs_total|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- True Yearly Budget Summary -->
+            <div class="mt-auto pt-4 border-t border-[#223649] flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[#90adcb]">Total Expense</span>
+                    <span class="text-white">₹{{ yearly_data.total_expense|floatformat:2|intcomma }}</span>
+                </div>
+                <div class="flex justify-between items-center mt-2 pt-2 border-t border-[#223649]/50">
+                    <span class="text-white font-medium">Net Yearly Balance</span>
+                    <span
+                        class="text-xl font-bold {% if yearly_data.is_surplus %}text-green-500{% else %}text-red-500{% endif %}">
+                        ₹{{ yearly_data.balance|floatformat:2|intcomma }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <h3 class="text-white font-medium mb-4">Monthly Expenses Breakdown</h3>
+            <div class="h-64 mb-6">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+
+            <h3 class="text-white font-medium mb-4 pt-6 border-t border-[#223649]">Monthly Cash Flow</h3>
+            <canvas id="monthlyIncomeExpenseChart"></canvas>
+        </div>
+        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+            <h3 class="text-white font-medium mb-4">Yearly Overview</h3>
+            <canvas id="yearlyChart"></canvas>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center p-20 text-center text-[#90adcb]">
+        <span class="material-symbols-outlined text-6xl mb-4">account_balance_wallet</span>
+        <h2 class="text-xl font-semibold text-white mb-2">No Active Budget</h2>
+        <p class="mb-6">Create a new budget plan to start tracking your monthly and yearly finances.</p>
+        <button onclick="openModal('createModal')"
+            class="px-6 py-3 rounded-lg bg-[#0d7ff2] text-white hover:bg-[#0b6bcb] transition-colors">
+            Create First Budget
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modals -->
+
+<!-- Create Budget Modal -->
+<div id="createModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-md m-4">
+        <h3 class="text-xl font-bold text-white mb-4">Create New Budget</h3>
+        <form method="POST" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="create_budget" value="true">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Budget Name</label>
+                {{ creation_form.name }}
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Copy Data From (Optional)</label>
+                {{ creation_form.copy_from }}
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeModal('createModal')"
+                    class="flex-1 px-4 py-2 rounded-lg bg-[#223649] text-white hover:bg-[#2c445a] transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2 rounded-lg bg-[#0d7ff2] text-white hover:bg-[#0b6bcb] transition-colors">
+                    Create
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Inactive Budgets Modal -->
+<div id="inactiveModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-2xl m-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Inactive Budgets</h3>
+            <button onclick="closeModal('inactiveModal')" class="text-[#90adcb] hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="flex flex-col gap-3">
+            {% for b in inactive_budgets %}
+            <div class="flex items-center justify-between p-4 bg-[#101922] border border-[#223649] rounded-lg">
+                <div>
+                    <h4 class="text-white font-medium">{{ b.name }}</h4>
+                    <p class="text-xs text-[#90adcb]">Last updated: {{ b.updated_at|date:"M d, Y" }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="viewBudget({{ b.id }})"
+                        class="px-3 py-1.5 rounded bg-[#90adcb]/20 text-[#90adcb] text-sm hover:bg-[#90adcb] hover:text-white transition-colors">
+                        View
+                    </button>
+                    <a href="{% url 'activate_budget' b.id %}"
+                        class="px-3 py-1.5 rounded bg-[#0d7ff2]/20 text-[#0d7ff2] text-sm hover:bg-[#0d7ff2] hover:text-white transition-colors">Make
+                        as Active</a>
+                    <a href="{% url 'delete_budget' b.id %}" onclick="return confirm('Are you sure?')"
+                        class="px-3 py-1.5 rounded bg-red-500/20 text-red-500 text-sm hover:bg-red-500 hover:text-white transition-colors">Delete</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-[#90adcb] py-8">No inactive budgets found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- View Budget Detail Modal -->
+<div id="viewBudgetModal"
+    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-60 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-3xl m-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-[#223649] pb-4">
+            <h3 class="text-xl font-bold text-white" id="viewBudgetTitle">Budget Details</h3>
+            <button onclick="closeViewModal()" class="text-[#90adcb] hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div id="viewBudgetContent" class="flex flex-col gap-6">
+            <!-- Content loaded via JS -->
+            <div class="animate-pulse flex flex-col gap-4">
+                <div class="h-4 bg-[#223649] rounded w-1/4"></div>
+                <div class="h-32 bg-[#223649] rounded w-full"></div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-[#223649] flex justify-end">
+            <button onclick="closeViewModal()"
+                class="px-4 py-2 rounded-lg bg-[#223649] text-white hover:bg-[#2c445a] transition-colors">
+                Back to List
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Edit Modal -->
+<div id="monthlyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-3xl m-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Edit Monthly Budget</h3>
+            <button onclick="closeModal('monthlyModal')" class="text-[#90adcb] hover:text-white"><span
+                    class="material-symbols-outlined">close</span></button>
+        </div>
+        <form method="POST" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="update_monthly" value="true">
+            <!-- Monthly Income -->
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Monthly In-hand Income</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#90adcb]">₹</span>
+                    <input type="number" name="monthly_income" value="{{ monthly_data.income }}" step="0.01"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:border-[#0d7ff2]">
+                </div>
+            </div>
+            <!-- Dynamic Fields -->
+            <!-- Fixed -->
+            <div class="flex flex-col gap-2 border-t border-[#223649] pt-4">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-[#90adcb]">Fixed Expenses</label>
+                    <button type="button" onclick="addRow('fixed-container-modal', 'fixed')"
+                        class="text-xs text-[#0d7ff2] hover:text-white">+ Add Row</button>
+                </div>
+                <div id="fixed-container-modal" class="space-y-2">
+                    {% for k, v in active_budget.fixed_expenses.items %}
+                    <div class="flex gap-2">
+                        <input type="text" name="fixed_key[]" value="{{ k }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="fixed_value[]" value="{{ v }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% empty %}
+                    <div class="flex gap-2">
+                        <input type="text" name="fixed_key[]" placeholder="Rent"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="fixed_value[]" placeholder="0"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Variable -->
+            <div class="flex flex-col gap-2 border-t border-[#223649] pt-4">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-[#90adcb]">Variable Expenses</label>
+                    <button type="button" onclick="addRow('variable-container-modal', 'variable')"
+                        class="text-xs text-[#0d7ff2] hover:text-white">+ Add Row</button>
+                </div>
+                <div id="variable-container-modal" class="space-y-2">
+                    {% for k, v in active_budget.variable_expenses.items %}
+                    <div class="flex gap-2">
+                        <input type="text" name="variable_key[]" value="{{ k }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="variable_value[]" value="{{ v }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% empty %}
+                    <div class="flex gap-2">
+                        <input type="text" name="variable_key[]" placeholder="Food"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="variable_value[]" placeholder="0"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Savings -->
+            <div class="flex flex-col gap-2 border-t border-[#223649] pt-4">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-[#90adcb]">Savings</label>
+                    <button type="button" onclick="addRow('savings-container-modal', 'savings')"
+                        class="text-xs text-[#0d7ff2] hover:text-white">+ Add Row</button>
+                </div>
+                <div id="savings-container-modal" class="space-y-2">
+                    {% for k, v in active_budget.savings_investments.items %}
+                    <div class="flex gap-2">
+                        <input type="text" name="savings_key[]" value="{{ k }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="savings_value[]" value="{{ v }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% empty %}
+                    <div class="flex gap-2">
+                        <input type="text" name="savings_key[]" placeholder="SIP"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="savings_value[]" placeholder="0"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeModal('monthlyModal')"
+                    class="flex-1 px-4 py-2 rounded-lg bg-[#223649] text-white">Cancel</button>
+                <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-[#0d7ff2] text-white">Save &
+                    Continue</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Yearly Edit Modal -->
+<div id="yearlyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6 w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Edit Yearly Budget</h3>
+            <button onclick="closeModal('yearlyModal')" class="text-[#90adcb] hover:text-white"><span
+                    class="material-symbols-outlined">close</span></button>
+        </div>
+        <form method="POST" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="update_yearly" value="true">
+            <!-- Yearly Income -->
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-[#90adcb]">Yearly Income (Projected: ₹
+                    {{active_budget.monthly_income|add:0|stringformat:"f"|floatformat:2 }} × 12)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#90adcb]">₹</span>
+                    <input type="number" name="yearly_income"
+                        value="{{ active_budget.yearly_income|default:yearly_data.income }}" step="0.01"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:border-[#0d7ff2]">
+                </div>
+            </div>
+            <!-- Annual Costs -->
+            <div class="flex flex-col gap-2 border-t border-[#223649] pt-4">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-[#90adcb]">Annual Costs</label>
+                    <button type="button" onclick="addRow('annual-container-modal', 'annual')"
+                        class="text-xs text-[#0d7ff2] hover:text-white">+ Add Row</button>
+                </div>
+                <div id="annual-container-modal" class="space-y-2">
+                    {% for k, v in active_budget.annual_costs.items %}
+                    <div class="flex gap-2">
+                        <input type="text" name="annual_key[]" value="{{ k }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="annual_value[]" value="{{ v }}"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% empty %}
+                    <div class="flex gap-2">
+                        <input type="text" name="annual_key[]" placeholder="Vacation"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                        <input type="number" name="annual_value[]" placeholder="0"
+                            class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeModal('yearlyModal')"
+                    class="flex-1 px-4 py-2 rounded-lg bg-[#223649] text-white">Cancel</button>
+                <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-[#0d7ff2] text-white">Save & Finish</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    // View Modal Logic
+    async function viewBudget(id) {
+        // Hide inactive list, show detail modal (loading state)
+        document.getElementById('inactiveModal').classList.add('hidden');
+        document.getElementById('viewBudgetModal').classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/budget/details/${id}/`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+
+            document.getElementById('viewBudgetTitle').textContent = data.name;
+
+            const formatCurrency = (amount) => '₹' + parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const renderTable = (items, total) => {
+                let html = '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-[#90adcb]"><tbody class="divide-y divide-[#223649]/50">';
+                for (const [k, v] of Object.entries(items)) {
+                    html += `<tr><td class="py-1">${k}</td><td class="py-1 text-right text-white">${formatCurrency(v)}</td></tr>`;
+                }
+                html += `<tr class="font-bold bg-[#101922]"><td class="py-1 pl-2">Total</td><td class="py-1 pr-2 text-right text-white">${formatCurrency(total)}</td></tr>`;
+                html += '</tbody></table></div>';
+                return html;
+            };
+
+            const content = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Monthly -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="font-bold text-white border-b border-[#223649] pb-2">Monthly</h4>
+                        <div class="flex justify-between text-sm"><span class="text-[#90adcb]">Income</span><span class="text-white">${formatCurrency(data.monthly_income)}</span></div>
+                        
+                        <div><span class="text-xs text-[#90adcb] uppercase">Fixed Expenses</span>${renderTable(data.fixed_expenses, Object.values(data.fixed_expenses).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                        <div><span class="text-xs text-[#90adcb] uppercase">Variable Expenses</span>${renderTable(data.variable_expenses, Object.values(data.variable_expenses).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                        <div><span class="text-xs text-[#90adcb] uppercase">Savings</span>${renderTable(data.savings_investments, Object.values(data.savings_investments).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                        
+                        <div class="flex justify-between text-sm font-bold border-t border-[#223649] pt-2">
+                             <span class="text-[#90adcb]">Balance</span>
+                             <span class="${data.monthly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.monthly_balance)}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Yearly -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="font-bold text-white border-b border-[#223649] pb-2">Yearly Projection</h4>
+                         <div class="flex justify-between text-sm"><span class="text-[#90adcb]">Total Income</span><span class="text-white">${formatCurrency(data.yearly_income)}</span></div>
+                         <div><span class="text-xs text-[#90adcb] uppercase">Annual Costs</span>${renderTable(data.annual_costs, Object.values(data.annual_costs).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                         
+                         <div class="flex justify-between text-sm font-bold border-t border-[#223649] pt-2">
+                             <span class="text-[#90adcb]">Net Balance</span>
+                             <span class="${data.yearly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.yearly_balance)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('viewBudgetContent').innerHTML = content;
+
+        } catch (error) {
+            document.getElementById('viewBudgetContent').innerHTML = '<p class="text-red-500">Error loading budget details.</p>';
+            console.error(error);
+        }
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewBudgetModal').classList.add('hidden');
+        document.getElementById('inactiveModal').classList.remove('hidden');
+    }
+
+    function addRow(containerId, prefix) {
+        const container = document.getElementById(containerId);
+        const div = document.createElement('div');
+        div.className = 'flex gap-2';
+        div.innerHTML = `
+            <input type="text" name="${prefix}_key[]" placeholder="Name" class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+            <input type="number" name="${prefix}_value[]" placeholder="Amount" class="w-1/2 bg-[#101922] border border-[#223649] text-white rounded-lg px-3 py-2 text-sm">
+        `;
+        container.appendChild(div);
+    }
+
+    // Auto-open modal based on mode
+    {% if mode == 'edit_monthly' %}
+    openModal('monthlyModal');
+    {% elif mode == 'edit_yearly' %}
+    openModal('yearlyModal');
+    {% endif %}
+
+    {% if active_budget %}
+    // Charts
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fixed', 'Variable', 'Savings'],
+            datasets: [{
+                data: [{{ monthly_data.fixed_total }}, {{ monthly_data.variable_total }}, {{ monthly_data.savings_total }}],
+        backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+        borderColor: '#1b2733',
+        borderWidth: 2
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { color: '#90adcb' } }
+        }
+    }
+    });
+
+    const monthlyIncomeExpenseCtx = document.getElementById('monthlyIncomeExpenseChart').getContext('2d');
+    new Chart(monthlyIncomeExpenseCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Total Expense'],
+            datasets: [{
+                label: 'Monthly Flow',
+                data: [{{ monthly_data.income }}, {{ monthly_data.total_expense }}],
+        backgroundColor: ['#10b981', '#ef4444'],
+        barPercentage: 0.6
+    }]
+        },
+        options: {
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { grid: { color: '#223649' }, ticks: { color: '#90adcb' } },
+            x: { grid: { display: false }, ticks: { color: '#90adcb' } }
+        }
+    }
+    });
+
+    const yearlyCtx = document.getElementById('yearlyChart').getContext('2d');
+    new Chart(yearlyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expense'],
+            datasets: [{
+                label: 'Yearly Plan',
+                data: [{{ yearly_data.income }}, {{ yearly_data.total_expense }}],
+        backgroundColor: ['#10b981', '#ef4444'],
+    }]
+        },
+        options: {
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: { grid: { color: '#223649' }, ticks: { color: '#90adcb' } },
+            x: { grid: { display: false }, ticks: { color: '#90adcb' } }
+        }
+    }
+    });
+    {% endif %}
+</script>
+{% endblock %}

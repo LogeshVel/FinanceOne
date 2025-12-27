@@ -76,6 +76,11 @@
                         <span class="material-symbols-outlined">dashboard</span>
                         <span class="text-sm font-medium">Portfolio</span>
                     </a>
+                    <a href="{% url 'budget' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'budget' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                        <span class="text-sm font-medium">Budget</span>
+                    </a>
                     <a href="{% url 'income' %}"
                         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'income' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">payments</span>

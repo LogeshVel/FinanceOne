@@ -22,4 +22,8 @@ urlpatterns = [
     path('insurance/delete/<int:id>/', views.delete_insurance, name='delete_insurance'),
     path('retirement/delete/<int:id>/', views.delete_retirement, name='delete_retirement'),
     path('assets/delete/<int:id>/', views.delete_asset, name='delete_asset'),
+    path('budget/', views.budget_page, name='budget'),
+    path('budget/activate/<int:id>/', views.activate_budget, name='activate_budget'),
+    path('budget/delete/<int:id>/', views.delete_budget, name='delete_budget'),
+    path('budget/details/<int:id>/', views.get_budget_details, name='get_budget_details'),
 ]
