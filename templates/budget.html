@@ -534,43 +534,117 @@
             document.getElementById('viewBudgetTitle').textContent = data.name;
 
             const formatCurrency = (amount) => '₹' + parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const parseAmount = (amount) => parseFloat(amount) || 0;
 
-            const renderTable = (items, total) => {
-                let html = '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-[#90adcb]"><tbody class="divide-y divide-[#223649]/50">';
-                for (const [k, v] of Object.entries(items)) {
-                    html += `<tr><td class="py-1">${k}</td><td class="py-1 text-right text-white">${formatCurrency(v)}</td></tr>`;
+            // Helper to render a styled expense table block
+            const renderTableBlock = (title, items, total) => {
+                let html = `
+                <div class="flex flex-col gap-2 bg-[#101922]/50 p-3 rounded-lg border border-[#223649]/50">
+                    <span class="text-xs font-semibold text-[#90adcb] uppercase tracking-wider">${title}</span>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <tbody class="divide-y divide-[#223649]/30">
+                `;
+
+                const entries = Object.entries(items);
+                if (entries.length === 0) {
+                    html += `<tr><td colspan="2" class="py-1 text-gray-500 text-xs italic">No items</td></tr>`;
+                } else {
+                    for (const [k, v] of entries) {
+                        html += `<tr><td class="py-1 text-gray-400 text-xs">${k}</td><td class="py-1 text-right text-gray-300 text-xs">${formatCurrency(v)}</td></tr>`;
+                    }
                 }
-                html += `<tr class="font-bold bg-[#101922]"><td class="py-1 pl-2">Total</td><td class="py-1 pr-2 text-right text-white">${formatCurrency(total)}</td></tr>`;
-                html += '</tbody></table></div>';
+
+                html += `
+                                <tr class="font-medium">
+                                    <td class="py-2 text-[#90adcb] text-sm pt-3">Subtotal</td>
+                                    <td class="py-2 text-right text-white text-sm pt-3">${formatCurrency(total)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
                 return html;
             };
+
+            // Calculate Totals
+            const fixedTotal = Object.values(data.fixed_expenses).reduce((a, b) => a + parseAmount(b), 0);
+            const variableTotal = Object.values(data.variable_expenses).reduce((a, b) => a + parseAmount(b), 0);
+            const savingsTotal = Object.values(data.savings_investments).reduce((a, b) => a + parseAmount(b), 0);
+            const totalMonthlyExpense = fixedTotal + variableTotal + savingsTotal;
+
+            const annualCostsTotal = Object.values(data.annual_costs).reduce((a, b) => a + parseAmount(b), 0);
+            const yearlyMonthlyExpenses = totalMonthlyExpense * 12;
+            const totalYearlyExpense = yearlyMonthlyExpenses + annualCostsTotal;
+
 
             const content = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Monthly -->
                     <div class="flex flex-col gap-4">
-                        <h4 class="font-bold text-white border-b border-[#223649] pb-2">Monthly</h4>
-                        <div class="flex justify-between text-sm"><span class="text-[#90adcb]">Income</span><span class="text-white">${formatCurrency(data.monthly_income)}</span></div>
+                        <h4 class="font-bold text-white border-b border-[#223649] pb-2">Monthly Budget</h4>
                         
-                        <div><span class="text-xs text-[#90adcb] uppercase">Fixed Expenses</span>${renderTable(data.fixed_expenses, Object.values(data.fixed_expenses).reduce((a, b) => a + parseFloat(b), 0))}</div>
-                        <div><span class="text-xs text-[#90adcb] uppercase">Variable Expenses</span>${renderTable(data.variable_expenses, Object.values(data.variable_expenses).reduce((a, b) => a + parseFloat(b), 0))}</div>
-                        <div><span class="text-xs text-[#90adcb] uppercase">Savings</span>${renderTable(data.savings_investments, Object.values(data.savings_investments).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                        <!-- Income -->
+                        <div class="flex justify-between items-center py-2 border-b border-[#223649]/50">
+                             <span class="text-[#90adcb] text-sm">Income</span>
+                             <span class="text-white font-medium">${formatCurrency(data.monthly_income)}</span>
+                        </div>
                         
-                        <div class="flex justify-between text-sm font-bold border-t border-[#223649] pt-2">
-                             <span class="text-[#90adcb]">Balance</span>
-                             <span class="${data.monthly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.monthly_balance)}</span>
+                        <!-- Expenses Group -->
+                        <div class="space-y-4 pl-2 border-l-2 border-[#223649] ml-1">
+                            ${renderTableBlock('Fixed Expenses', data.fixed_expenses, fixedTotal)}
+                            ${renderTableBlock('Variable Expenses', data.variable_expenses, variableTotal)}
+                            ${renderTableBlock('Savings & Investments', data.savings_investments, savingsTotal)}
+                        </div>
+                        
+                        <!-- Summary -->
+                        <div class="mt-2 pt-4 border-t border-[#223649] flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-[#90adcb]">Total Monthly Expense</span>
+                                <span class="text-white">${formatCurrency(totalMonthlyExpense)}</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-[#223649]/50">
+                                <span class="text-sm text-[#90adcb]">Monthly Balance</span>
+                                <span class="text-xl font-bold ${data.monthly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.monthly_balance)}</span>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Yearly -->
                     <div class="flex flex-col gap-4">
                         <h4 class="font-bold text-white border-b border-[#223649] pb-2">Yearly Projection</h4>
-                         <div class="flex justify-between text-sm"><span class="text-[#90adcb]">Total Income</span><span class="text-white">${formatCurrency(data.yearly_income)}</span></div>
-                         <div><span class="text-xs text-[#90adcb] uppercase">Annual Costs</span>${renderTable(data.annual_costs, Object.values(data.annual_costs).reduce((a, b) => a + parseFloat(b), 0))}</div>
+                        
+                         <!-- Income -->
+                        <div class="flex justify-between items-center py-2 border-b border-[#223649]/50">
+                             <span class="text-[#90adcb] text-sm">Total Income</span>
+                             <span class="text-white font-medium">${formatCurrency(data.yearly_income)}</span>
+                        </div>
+
+                         <!-- Expenses Group -->
+                        <div class="space-y-4 pl-2 border-l-2 border-[#223649] ml-1">
+                            <!-- Recurring -->
+                             <div class="flex flex-col gap-2 bg-[#101922]/50 p-3 rounded-lg border border-[#223649]/50">
+                                <span class="text-xs font-semibold text-[#90adcb] uppercase tracking-wider">Recurring Monthly Expenses</span>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-400">Total (x12)</span>
+                                    <span class="text-white">${formatCurrency(yearlyMonthlyExpenses)}</span>
+                                </div>
+                            </div>
+
+                            <!-- Annual Costs -->
+                            ${renderTableBlock('Annual Costs (One-time)', data.annual_costs, annualCostsTotal)}
+                        </div>
                          
-                         <div class="flex justify-between text-sm font-bold border-t border-[#223649] pt-2">
-                             <span class="text-[#90adcb]">Net Balance</span>
-                             <span class="${data.yearly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.yearly_balance)}</span>
+                         <!-- Summary -->
+                        <div class="mt-auto pt-4 border-t border-[#223649] flex flex-col gap-2">
+                             <div class="flex justify-between items-center">
+                                <span class="text-[#90adcb]">Total Expense</span>
+                                <span class="text-white">${formatCurrency(totalYearlyExpense)}</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-[#223649]/50">
+                                <span class="text-sm text-[#90adcb]">Net Yearly Balance</span>
+                                <span class="text-xl font-bold ${data.yearly_balance >= 0 ? 'text-green-500' : 'text-red-500'}">${formatCurrency(data.yearly_balance)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

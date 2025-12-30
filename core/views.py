@@ -566,6 +566,16 @@ def loans_view(request):
         'selected_type': loan_type_filter,
         'selected_sort': sort_by,
     }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        table_html = render_to_string('partials/loan_list.html', context)
+        return JsonResponse({
+            'table_html': table_html,
+            'total_loan_amount': total_loan_amount,
+            'total_outstanding_amount': round(total_outstanding_amount, 2),
+            'total_monthly_emi': round(total_monthly_emi, 2)
+        })
+
     return render(request, 'loans.html', context)
 
 @login_required

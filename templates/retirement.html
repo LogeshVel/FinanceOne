@@ -9,6 +9,11 @@
             <h1 class="text-white text-3xl md:text-4xl font-black tracking-tight mb-2">Retirement Portfolio</h1>
             <p class="text-[#90adcb] text-base">Track and manage your retirement assets and contributions.</p>
         </div>
+        <button onclick="document.getElementById('retirementModal').showModal()"
+            class="bg-[#0d7ff2] hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
+            <span class="material-symbols-outlined text-[20px]">add</span>
+            Add Asset
+        </button>
     </div>
 
     <!-- Stats Row -->
@@ -43,10 +48,10 @@
     </div>
 
     <!-- Content Row: Table & Form -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="flex flex-col gap-6">
 
-        <!-- Asset List Table (Span 2) -->
-        <div class="xl:col-span-2 bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl overflow-hidden">
+        <!-- Asset List Table -->
+        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl overflow-hidden">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-white text-lg font-bold">Holdings</h3>
             </div>
@@ -98,69 +103,75 @@
             </div>
         </div>
 
-        <!-- Add Asset Form (Span 1) -->
-        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl h-fit">
-            <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-6">
-                <span class="material-symbols-outlined text-[#0d7ff2]">add_circle</span> Add Asset
-            </h3>
-            <form method="POST" class="flex flex-col gap-5">
-                {% csrf_token %}
-                <div class="space-y-1">
-                    <label class="text-[#90adcb] text-xs uppercase font-bold">Account Type</label>
-                    <select name="account_type"
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all">
-                        <option value="NPS">NPS (National Pension System)</option>
-                        <option value="EPF">EPF (Employees' Provident Fund)</option>
-                        <option value="PPF">PPF (Public Provident Fund)</option>
-                        <option value="401(k)">401(k)</option>
-                        <option value="IRA">IRA (Individual Retirement Account)</option>
-                        <option value="Roth IRA">Roth IRA</option>
-                        <option value="Mutual Fund">Mutual Fund (Retirement)</option>
-                        <option value="FD">Fixed Deposit</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[#90adcb] text-xs uppercase font-bold">Provider / Name</label>
-                    <input type="text" name="provider" required
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
-                        placeholder="e.g. HDFC, Vanguard, Employer">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[#90adcb] text-xs uppercase font-bold">Current Balance</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
-                        <input type="number" name="balance" step="0.01" required
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
-                            placeholder="0.00">
-                    </div>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[#90adcb] text-xs uppercase font-bold">Monthly Contribution</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
-                        <input type="number" name="monthly_contribution" step="0.01" required
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
-                            placeholder="0.00">
-                    </div>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[#90adcb] text-xs uppercase font-bold">Expected Return (%)</label>
-                    <input type="number" name="return_rate" step="0.01" value="7.00" required
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]">
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-[#0d7ff2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg mt-2 transition-colors shadow-lg shadow-blue-500/20">
-                    Save Asset
-                </button>
-            </form>
-        </div>
-
     </div>
 </div>
+
+<!-- Retirement Modal -->
+<dialog id="retirementModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
+    <div class="bg-[#1b2733] border border-[#223649] text-white rounded-xl shadow-2xl p-6">
+        <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-6">
+            <span class="material-symbols-outlined text-[#0d7ff2]">add_circle</span> Add Asset
+        </h3>
+        <form method="POST" class="flex flex-col gap-5">
+            {% csrf_token %}
+            <div class="space-y-1">
+                <label class="text-[#90adcb] text-xs uppercase font-bold">Account Type</label>
+                <select name="account_type"
+                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all">
+                    <option value="NPS">NPS (National Pension System)</option>
+                    <option value="EPF">EPF (Employees' Provident Fund)</option>
+                    <option value="PPF">PPF (Public Provident Fund)</option>
+                    <option value="401(k)">401(k)</option>
+                    <option value="IRA">IRA (Individual Retirement Account)</option>
+                    <option value="Roth IRA">Roth IRA</option>
+                    <option value="Mutual Fund">Mutual Fund (Retirement)</option>
+                    <option value="FD">Fixed Deposit</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[#90adcb] text-xs uppercase font-bold">Provider / Name</label>
+                <input type="text" name="provider" required
+                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                    placeholder="e.g. HDFC, Vanguard, Employer">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[#90adcb] text-xs uppercase font-bold">Current Balance</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                    <input type="number" name="balance" step="0.01" required
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                        placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[#90adcb] text-xs uppercase font-bold">Monthly Contribution</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                    <input type="number" name="monthly_contribution" step="0.01" required
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                        placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[#90adcb] text-xs uppercase font-bold">Expected Return (%)</label>
+                <input type="number" name="return_rate" step="0.01" value="7.00" required
+                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]">
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="document.getElementById('retirementModal').close()"
+                    class="flex-1 border border-[#223649] text-white hover:bg-[#223649] py-3 rounded-lg transition-colors font-medium">Cancel</button>
+                <button type="submit"
+                    class="flex-1 bg-[#0d7ff2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                    Save Asset
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
 {% endblock %}
