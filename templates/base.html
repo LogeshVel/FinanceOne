@@ -108,19 +108,15 @@
                         <span class="text-sm font-medium">Retirement</span>
                     </a>
                     <a href="{% url 'insurance' %}"
-                        class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-[#1b2733] {% if request.resolver_match.url_name == 'insurance' %}bg-[#1b2733] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] border-l-4 border-transparent{% endif %}">
-                        <span
-                            class="material-symbols-outlined {% if request.resolver_match.url_name == 'insurance' %}text-[#0d7ff2]{% else %}group-hover:text-white{% endif %}">verified_user</span>
-                        <span
-                            class="font-medium {% if request.resolver_match.url_name == 'insurance' %}text-white{% else %}group-hover:text-white{% endif %}">Insurance</span>
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'insurance' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        <span class="material-symbols-outlined">verified_user</span>
+                        <span class="text-sm font-medium">Insurance</span>
                     </a>
 
                     <a href="{% url 'loans' %}"
-                        class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-[#1b2733] {% if request.resolver_match.url_name == 'loans' %}bg-[#1b2733] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] border-l-4 border-transparent{% endif %}">
-                        <span
-                            class="material-symbols-outlined {% if request.resolver_match.url_name == 'loans' %}text-[#0d7ff2]{% else %}group-hover:text-white{% endif %}">account_balance</span>
-                        <span
-                            class="font-medium {% if request.resolver_match.url_name == 'loans' %}text-white{% else %}group-hover:text-white{% endif %}">Loans</span>
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'loans' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        <span class="material-symbols-outlined">account_balance</span>
+                        <span class="text-sm font-medium">Loans</span>
                     </a>
                 </nav>
             </div>

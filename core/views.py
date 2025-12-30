@@ -6,6 +6,7 @@ from django.db.models import Sum
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.template.loader import render_to_string
 from finance.models import Asset, Retirement, Income, Expense, Loan, Insurance
 from .models import Budget, FinancialGoal
 from .utils import calculate_projections, calculate_loan_outstanding
@@ -13,6 +14,12 @@ from datetime import datetime
 from .forms import UserRegistrationForm, BudgetCreationForm, FinancialGoalForm
 from datetime import datetime, timezone
 import calendar
+
+def format_labels(keys, values):
+    total = sum(values)
+    if total == 0:
+        return keys
+    return [f"{k} ({(v/total*100):.1f}%)" for k, v in zip(keys, values)]
 
 def register_view(request):
     if request.method == 'POST':
@@ -161,26 +168,26 @@ def dashboard_view(request):
         'total_retirement': total_retirement,
         'projection_labels': projection_labels,
         'projection_values': projection_values,
-        'asset_labels': list(asset_types.keys()),
+        'asset_labels': format_labels(list(asset_types.keys()), list(asset_types.values())),
         'asset_values': list(asset_types.values()),
         'incomes': incomes,
         'expenses': expenses,
         'retirements': retirements,
         'zip_assets': zip(list(asset_types.keys()), list(asset_types.values())),
-        'income_chart_labels': list(income_cats.keys()),
+        'income_chart_labels': format_labels(list(income_cats.keys()), list(income_cats.values())),
         'income_chart_values': list(income_cats.values()),
         'total_current_income': current_year_income,
-        'expense_chart_labels': list(expense_cats.keys()),
+        'expense_chart_labels': format_labels(list(expense_cats.keys()), list(expense_cats.values())),
         'expense_chart_values': list(expense_cats.values()),
         'total_current_expense': current_year_expense,
         
         # New Definitions
         'total_annual_emi': round(total_annual_emi, 2),
-        'loan_chart_labels': list(loan_cats.keys()),
+        'loan_chart_labels': format_labels(list(loan_cats.keys()), list(loan_cats.values())),
         'loan_chart_values': list(loan_cats.values()),
         
         'total_annual_premium': round(total_annual_premium, 2),
-        'insurance_chart_labels': list(insurance_cats.keys()),
+        'insurance_chart_labels': format_labels(list(insurance_cats.keys()), list(insurance_cats.values())),
         'insurance_chart_values': list(insurance_cats.values()),
     }
     return render(request, 'dashboard.html', context)
@@ -279,6 +286,7 @@ def expense_view(request):
     monthly_data = {i: 0 for i in range(1, 13)}
     
     current_year = datetime.now().year
+    current_month = datetime.now().month
     current_year_total = 0
     
     for e in all_expenses:
@@ -305,6 +313,61 @@ def expense_view(request):
     monthly_labels = [calendar.month_name[i] for i in range(1, 13)]
     monthly_values = [monthly_data[i] for i in range(1, 13)]
             
+    # Category Pie Chart Data (Yearly & Monthly specific context)
+    # Refined logic: Both charts should respect the table filter scope.
+    selected_year = request.GET.get('year')
+    if selected_year is None:
+        selected_year = str(current_year)
+    
+    selected_month = request.GET.get('month')
+    if selected_month is None:
+        selected_month = str(current_month)
+
+    # Determine display titles
+    target_year_display = selected_year if selected_year != 'all' else "All Time"
+    
+    if selected_month != 'all':
+        target_month_display = calendar.month_name[int(selected_month)]
+        if selected_year != 'all':
+             target_month_display = f"{target_month_display} {selected_year}"
+        else:
+             target_month_display = f"All {target_month_display}s" # e.g. "All Januarys"
+    else:
+        target_month_display = "All Months"
+        if selected_year != 'all':
+             target_month_display = f"All Months ({selected_year})"
+        else:
+             target_month_display = "All Time"
+
+    # Determine filter constraints for Aggregation
+    filter_year = int(selected_year) if selected_year != 'all' else None
+    filter_month = int(selected_month) if selected_month != 'all' else None
+    
+    yearly_pie_cats = {}
+    monthly_pie_cats = {}
+    
+    for e in all_expenses:
+        amount = float(e.amount)
+        
+        # Yearly Pie Logic: 
+        # Context is the Year selector.
+        if filter_year is None or e.date.year == filter_year:
+            yearly_pie_cats[e.category] = yearly_pie_cats.get(e.category, 0) + amount
+            
+        # Monthly Pie Logic:
+        # Context is Year selector + Month selector.
+        match_year = (filter_year is None or e.date.year == filter_year)
+        match_month = (filter_month is None or e.date.month == filter_month)
+        
+        if match_year and match_month:
+             monthly_pie_cats[e.category] = monthly_pie_cats.get(e.category, 0) + amount
+                
+    yearly_pie_labels = format_labels(list(yearly_pie_cats.keys()), list(yearly_pie_cats.values()))
+    yearly_pie_values = list(yearly_pie_cats.values())
+    
+    monthly_pie_labels = format_labels(list(monthly_pie_cats.keys()), list(monthly_pie_cats.values()))
+    monthly_pie_values = list(monthly_pie_cats.values())
+            
     highest_category = max(cats, key=cats.get) if cats else "None"
     
     # Daily Average
@@ -313,8 +376,6 @@ def expense_view(request):
     
     # Filtering for Table
     expenses = all_expenses
-    selected_year = request.GET.get('year')
-    selected_month = request.GET.get('month')
     
     if selected_year and selected_year != 'all':
         expenses = expenses.filter(date__year=selected_year)
@@ -339,7 +400,25 @@ def expense_view(request):
         'monthly_labels': monthly_labels,
         'monthly_values': monthly_values,
         'current_year': current_year,
+        'target_year_display': target_year_display,
+        'target_month_display': target_month_display,
+        'yearly_pie_labels': yearly_pie_labels,
+        'yearly_pie_values': yearly_pie_values,
+        'monthly_pie_labels': monthly_pie_labels,
+        'monthly_pie_values': monthly_pie_values,
     }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        table_html = render_to_string('partials/expense_list.html', context)
+        return JsonResponse({
+            'table_html': table_html,
+            'yearly_pie_labels': yearly_pie_labels,
+            'yearly_pie_values': yearly_pie_values,
+            'monthly_pie_labels': monthly_pie_labels,
+            'monthly_pie_values': monthly_pie_values,
+            'target_year_display': target_year_display,
+            'target_month_display': target_month_display
+        })
 
     return render(request, 'expense.html', context)
 
@@ -386,7 +465,7 @@ def assets_view(request):
         'total_pl': total_pl,
         'total_pl_abs': abs(total_pl),
         'pl_percent': pl_percent,
-        'chart_labels': list(type_alloc.keys()),
+        'chart_labels': format_labels(list(type_alloc.keys()), list(type_alloc.values())),
         'chart_values': list(type_alloc.values())
     }
     return render(request, 'assets.html', context)
@@ -665,6 +744,7 @@ def budget_page(request):
         'creation_form': creation_form,
         'monthly_data': monthly_data,
         'yearly_data': yearly_data,
+        'monthly_budget_labels': format_labels(['Fixed', 'Variable', 'Savings'], [monthly_data.get('fixed_total', 0), monthly_data.get('variable_total', 0), monthly_data.get('savings_total', 0)]) if active_budget else [],
         'mode': request.GET.get('mode', '')
     }
     return render(request, 'budget.html', context)

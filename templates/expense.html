@@ -9,6 +9,11 @@
             <h1 class="text-3xl font-black tracking-tight text-white mb-2">Expense History</h1>
             <p class="text-[#90adcb]">Manage and track your monthly spending records.</p>
         </div>
+        <button onclick="document.getElementById('expenseModal').showModal()"
+            class="bg-[#0d7ff2] hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
+            <span class="material-symbols-outlined text-[20px]">add</span>
+            Add Expense
+        </button>
     </div>
 
     <!-- Stats Cards -->
@@ -67,13 +72,26 @@
                 type: 'bar',
                 data: {
                     labels: {{ yearly_labels| safe }},
-            datasets: [{
+            datasets: [
+            {
+                type: 'line',
+                label: 'Trend',
+                data: {{ yearly_values| safe }},
+            borderColor: '#38bdf8',
+            borderWidth: 2,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: '#38bdf8',
+            order: 0
+                },
+            {
                 label: 'Total Spend',
                 data: {{ yearly_values| safe }},
             backgroundColor: '#0d7ff2',
             borderRadius: 4,
             barThickness: 30,
-                    }]
+            order: 1
+                }]
                 },
             options: {
             responsive: true,
@@ -101,12 +119,25 @@
             type: 'bar',
             data: {
                 labels: {{ monthly_labels| safe }},
-            datasets: [{
+            datasets: [
+            {
+                type: 'line',
+                label: 'Trend',
+                data: {{ monthly_values| safe }},
+            borderColor: '#38bdf8',
+            borderWidth: 2,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: '#38bdf8',
+            order: 0
+                },
+            {
                 label: 'Monthly Spend',
                 data: {{ monthly_values| safe }},
             backgroundColor: '#10b981',
             borderRadius: 4,
             barThickness: 20,
+            order: 1
                     }]
                 },
             options: {
@@ -128,13 +159,59 @@
             }
         }
             });
+
+        // --- NEW PIE CHARTS ---
+        const pieOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#90adcb', boxWidth: 12 }
+                }
+            }
+        };
+
+        const colors = ['#0d7ff2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
+
+        // Yearly Category Pie
+        const yearlyPieCtx = document.getElementById('yearlyPieChart').getContext('2d');
+        window.yearlyPieChart = new Chart(yearlyPieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ yearly_pie_labels| safe }},
+            datasets: [{
+                data: {{ yearly_pie_values| safe }},
+            backgroundColor: colors,
+            borderWidth: 0
+                }]
+            },
+            options: pieOptions
+        });
+
+        // Monthly Category Pie
+        const monthlyPieCtx = document.getElementById('monthlyPieChart').getContext('2d');
+        window.monthlyPieChart = new Chart(monthlyPieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ monthly_pie_labels| safe }},
+            datasets: [{
+                data: {{ monthly_pie_values| safe }},
+            backgroundColor: colors,
+            borderWidth: 0
+                }]
+            },
+            options: pieOptions
+        });
         });
     </script>
 
+    <!-- Pie Charts moved to table section -->
+
     <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="flex flex-col gap-6">
         <!-- Expenses List -->
-        <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="flex flex-col gap-6">
             <div class="bg-[#1b2733] border border-[#223649] rounded-xl overflow-hidden">
                 <div
                     class="p-4 border-b border-[#223649] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -236,116 +313,212 @@
                             Filter
                         </button>
                         {% if selected_year or selected_month %}
-                        <a href="{% url 'expense' %}"
+                        <a href="{% url 'expense' %}" id="reset-filter-btn"
                             class="text-[#0d7ff2] hover:text-blue-400 text-sm flex items-center">Reset</a>
                         {% endif %}
                     </form>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-[#101922] border-b border-[#223649]">
-                                <th class="p-4 text-[#90adcb] font-medium text-sm">Transaction</th>
-                                <th class="p-4 text-[#90adcb] font-medium text-sm">Category</th>
-                                <th class="p-4 text-[#90adcb] font-medium text-sm">Date</th>
-                                <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Amount</th>
-                                <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for expense in expenses %}
-                            <tr
-                                class="border-b border-[#223649] hover:bg-[#101922]/50 cursor-pointer group transition-colors">
-                                <td class="p-4">
-                                    <div class="flex items-center">
-                                        <div
-                                            class="w-10 h-10 bg-[#223649] rounded-full flex items-center justify-center text-[#90adcb]">
-                                            <span class="material-symbols-outlined text-lg">receipt_long</span>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-white">{{ expense.description }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#223649] text-[#90adcb]">
-                                        {{ expense.category }}
-                                    </span>
-                                </td>
-                                <td class="p-4 text-sm text-[#90adcb]">
-                                    {{ expense.date }}
-                                </td>
-                                <td class="p-4 text-right text-sm font-bold text-white">
-                                    -₹{{ expense.amount|intcomma }}
-                                </td>
-                                <td class="p-4 text-center">
-                                    <a href="{% url 'delete_expense' expense.id %}"
-                                        onclick="return confirm('Are you sure you want to delete this expense?')"
-                                        class="text-red-500 hover:text-red-400 transition-colors">
-                                        <span class="material-symbols-outlined text-[20px]">delete</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="p-8 text-center text-[#90adcb]">No expenses found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="relative min-h-[400px]" id="expense-content-wrapper">
+                    <!-- Loading Overlay -->
+                    <div id="expense-loader"
+                        class="absolute inset-0 bg-[#1b2733]/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center hidden rounded-b-xl transition-all duration-300">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#0d7ff2] mb-3"></div>
+                        <p class="text-[#90adcb] text-sm font-medium animate-pulse">Updating Data...</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-[#101922] border-b border-[#223649]">
+                                    <th class="p-4 text-[#90adcb] font-medium text-sm">Transaction</th>
+                                    <th class="p-4 text-[#90adcb] font-medium text-sm">Category</th>
+                                    <th class="p-4 text-[#90adcb] font-medium text-sm">Date</th>
+                                    <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Amount</th>
+                                    <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expense-table-body">
+                                {% include 'partials/expense_list.html' %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Category Pie Charts (Inside Table Section) -->
+                    <div class="border-t border-[#223649] p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Yearly Pie -->
+                            <div>
+                                <h3 class="text-white font-semibold mb-4 text-sm text-center">
+                                    Category Split ({{ target_year_display }})</h3>
+                                <div class="h-64 flex items-center justify-center">
+                                    {% if yearly_pie_values %}
+                                    <canvas id="yearlyPieChart"></canvas>
+                                    {% else %}
+                                    <p class="text-[#586e82] text-sm">No data for this year</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Monthly Pie -->
+                            <div>
+                                <h3 class="text-white font-semibold mb-4 text-sm text-center">
+                                    Category Split ({{ target_month_display }})</h3>
+                                <div class="h-64 flex items-center justify-center">
+                                    {% if monthly_pie_values %}
+                                    <canvas id="monthlyPieChart"></canvas>
+                                    {% else %}
+                                    <p class="text-[#586e82] text-sm">No data for this month</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Quick Add Panel -->
-        <div class="lg:col-span-1">
-            <div class="sticky top-24 bg-[#1b2733] border border-[#223649] rounded-xl p-6">
-                <h3 class="text-lg font-bold text-white mb-1">Quick Add</h3>
-                <p class="text-sm text-[#90adcb] mb-6">Record a new expense instantly.</p>
-                <form method="POST" action="{% url 'expense' %}" class="flex flex-col gap-4">
-                    {% csrf_token %}
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Amount</label>
-                        <input type="number" step="0.01" name="amount"
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
-                            required placeholder="0.00">
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Description</label>
-                        <input type="text" name="description"
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
-                            required placeholder="e.g. Lunch">
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Category</label>
-                        <select name="category"
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
-                            <option value="Groceries">Groceries</option>
-                            <option value="Utilities">Utilities</option>
-                            <option value="Transport">Transport</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Dining">Dining</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Date</label>
-                        <input type="date" name="date"
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
-                            required>
-                    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterForm = document.querySelector('form');
+            const tableBody = document.getElementById('expense-table-body');
+            const resetButton = document.getElementById('reset-filter-btn');
+            const loader = document.getElementById('expense-loader');
+
+            // Function to update table via AJAX
+            function updateTable(url) {
+                // Show Loader
+                if (loader) loader.classList.remove('hidden');
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update Table
+                        tableBody.innerHTML = data.table_html;
+
+                        // Update Yearly Pie
+                        if (window.yearlyPieChart) {
+                            window.yearlyPieChart.data.labels = data.yearly_pie_labels;
+                            window.yearlyPieChart.data.datasets[0].data = data.yearly_pie_values;
+                            window.yearlyPieChart.update();
+                            // Update Title
+                            document.querySelector('#yearlyPieChart').closest('div').parentElement.querySelector('h3').textContent = `Category Split (${data.target_year_display})`;
+                        }
+
+                        // Update Monthly Pie
+                        if (window.monthlyPieChart) {
+                            window.monthlyPieChart.data.labels = data.monthly_pie_labels;
+                            window.monthlyPieChart.data.datasets[0].data = data.monthly_pie_values;
+                            window.monthlyPieChart.update();
+                            // Update Title
+                            document.querySelector('#monthlyPieChart').closest('div').parentElement.querySelector('h3').textContent = `Category Split (${data.target_month_display})`;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error))
+                    .finally(() => {
+                        // Hide Loader
+                        if (loader) {
+                            setTimeout(() => {
+                                loader.classList.add('hidden');
+                            }, 300);
+                        }
+                    });
+            }
+
+            if (filterForm) {
+                filterForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData);
+                    const url = `${window.location.pathname}?${params.toString()}`;
+
+                    // Update URL without reload
+                    window.history.pushState({}, '', url);
+
+                    updateTable(url);
+
+                    // Show reset button if not already visible (this logic might need refinement based on exact UI needs)
+                    if (!document.getElementById('reset-link')) {
+                        // Logic to show reset link if needed, but for now we rely on server rendering it initially or just present in DOM
+                    }
+                });
+            }
+
+            // Handle Reset Link click
+            if (resetButton) {
+                resetButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+
+                    // Reset form values to default
+                    filterForm.reset();
+
+                    // Choose 'All' or appropriate default in dropdowns if needed, 
+                    // though 'reset' usually clears them.
+                    // Actually, the server default is current month/year.
+
+                    // Update URL
+                    window.history.pushState({}, '', url);
+
+                    updateTable(url);
+                });
+            }
+        });
+    </script>
+    <!-- Expense Modal -->
+    <dialog id="expenseModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
+        <div class="bg-[#1b2733] border border-[#223649] text-white rounded-xl shadow-2xl p-6">
+            <h2 class="text-xl font-bold mb-4">Add New Expense</h2>
+            <form method="POST" action="{% url 'expense' %}" class="flex flex-col gap-4">
+                {% csrf_token %}
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Amount</label>
+                    <input type="number" step="0.01" name="amount"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        required placeholder="0.00">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Description</label>
+                    <input type="text" name="description"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        required placeholder="e.g. Lunch">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Category</label>
+                    <select name="category"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
+                        <option value="Groceries">Groceries</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Dining">Dining</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Date</label>
+                    <input type="date" name="date"
+                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                        required>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="document.getElementById('expenseModal').close()"
+                        class="flex-1 border border-[#223649] text-white hover:bg-[#223649] py-2 rounded-md transition-colors">Cancel</button>
                     <button type="submit"
-                        class="mt-4 w-full bg-[#0d7ff2] hover:bg-blue-600 text-white py-2 rounded-md transition-colors font-medium">
+                        class="flex-1 bg-[#0d7ff2] hover:bg-blue-600 text-white py-2 rounded-md transition-colors">
                         Save Expense
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
-    </div>
+    </dialog>
+</div>
+</div>
 </div>
 {% endblock %}
