@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -22,32 +22,86 @@
             theme: {
                 extend: {
                     colors: {
-                        background: '#101922',
-                        surface: '#1b2733',
-                        border: '#223649',
-                        primary: '#0d7ff2',
-                        secondary: '#90adcb',
+                        background: 'var(--bg-background)',
+                        surface: 'var(--bg-surface)',
+                        'card-hover': 'var(--bg-card-hover)',
+                        border: 'var(--border-color)',
+                        primary: 'var(--primary-color)',
+                        'primary-soft': 'var(--primary-bg-soft)',
+                        'text-main': 'var(--text-primary)',
+                        'text-muted': 'var(--text-secondary)',
                     }
                 }
             }
         }
     </script>
-
+    <script>
+        // Check local storage immediately to avoid flash
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        :root {
+            /* Light Theme */
+            --bg-background: #f9fafb;
+            /* gray-50 */
+            --bg-surface: #ffffff;
+            --bg-card-hover: #f3f4f6;
+            /* gray-100 */
+            --text-primary: #111827;
+            /* gray-900 */
+            --text-secondary: #6b7280;
+            /* gray-500 */
+            --border-color: #e5e7eb;
+            /* gray-200 */
+            --primary-color: #0d7ff2;
+            --primary-bg-soft: rgba(13, 127, 242, 0.1);
+        }
+
+        .dark {
+            /* Dark Theme */
+            --bg-background: #101922;
+            --bg-surface: #1b2733;
+            --bg-card-hover: #223649;
+            --text-primary: #ffffff;
+            --text-secondary: #90adcb;
+            --border-color: #223649;
+            --primary-color: #0d7ff2;
+            --primary-bg-soft: rgba(13, 127, 242, 0.2);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-            .material-symbols-outlined {
-                font-size: 24px;
-            }
+        .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        /* Smooth transitions */
+        *,
+        *::before,
+        *::after {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark mode overrides */
+        .dark [type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
         }
     </style>
 </head>
 
-<body class="flex h-screen w-full overflow-hidden bg-[#101922]">
+<body class="flex h-screen w-full overflow-hidden bg-background text-text-main">
 
     <!-- Mobile Overlay -->
     <div id="sidebar-overlay"
@@ -56,65 +110,65 @@
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="fixed inset-y-0 left-0 z-50 w-72 h-full border-r border-[#223649] bg-[#101922] flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static">
+        class="fixed inset-y-0 left-0 z-50 w-72 h-full border-r border-border bg-background flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static">
         <div class="flex flex-col h-full p-4 justify-between">
-            <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
                 <!-- Logo -->
-                <div class="flex gap-3 items-center px-2 py-2 mb-2">
-                    <div class="bg-[#0d7ff2]/20 flex items-center justify-center rounded-lg w-10 h-10 text-[#0d7ff2]">
+                <div class="flex gap-3 items-center px-2 py-2">
+                    <div class="bg-primary/20 flex items-center justify-center rounded-lg w-10 h-10 text-primary">
                         <span class="material-symbols-outlined text-2xl">all_inclusive</span>
                     </div>
                     <div class="flex flex-col">
-                        <h1 class="text-white text-base font-bold">Financial One</h1>
+                        <h1 class="text-text-main text-base font-bold">Financial One</h1>
                     </div>
                 </div>
 
                 <!-- Navigation -->
-                <nav class="flex flex-col gap-1 mt-2">
+                <nav class="flex flex-col gap-1">
                     <a href="{% url 'dashboard' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'dashboard' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'dashboard' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span class="text-sm font-medium">Portfolio</span>
                     </a>
                     <a href="{% url 'budget' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'budget' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'budget' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
                         <span class="text-sm font-medium">Budget</span>
                     </a>
 
                     <a href="{% url 'goals' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'goals' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'goals' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">flag</span>
                         <span class="text-sm font-medium">Goals</span>
                     </a>
                     <a href="{% url 'income' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'income' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'income' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">payments</span>
                         <span class="text-sm font-medium">Income</span>
                     </a>
                     <a href="{% url 'expense' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'expense' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'expense' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         <span class="text-sm font-medium">Expense</span>
                     </a>
                     <a href="{% url 'insurance' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'insurance' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'insurance' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">verified_user</span>
                         <span class="text-sm font-medium">Insurance</span>
                     </a>
 
                     <a href="{% url 'loans' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'loans' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'loans' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">account_balance</span>
                         <span class="text-sm font-medium">Loans</span>
                     </a>
                     <a href="{% url 'assets' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'assets' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'assets' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">account_balance</span>
                         <span class="text-sm font-medium">Assets</span>
                     </a>
                     <a href="{% url 'retirement' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'retirement' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'retirement' %}bg-primary/10 text-primary border-l-4 border-primary{% else %}text-text-muted hover:bg-card-hover hover:text-text-main{% endif %}">
                         <span class="material-symbols-outlined">savings</span>
                         <span class="text-sm font-medium">Retirement</span>
                     </a>
@@ -122,9 +176,16 @@
             </div>
 
             <!-- Bottom -->
-            <div class="flex flex-col gap-2 border-t border-[#223649] pt-4">
+            <div class="flex flex-col gap-2 border-t border-border pt-4">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-card-hover hover:text-text-main transition-colors w-full">
+                    <span class="material-symbols-outlined" id="themeIcon">light_mode</span>
+                    <span class="text-sm font-medium" id="themeText">Light Mode</span>
+                </button>
+
                 <a href="{% url 'logout' %}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#90adcb] hover:bg-red-500/10 hover:text-red-400 transition-colors w-full">
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-400 transition-colors w-full">
                     <span class="material-symbols-outlined">logout</span>
                     <span class="text-sm font-medium">Log Out</span>
                 </a>
@@ -136,13 +197,13 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         <!-- Header -->
         <header
-            class="h-16 flex lg:hidden items-center justify-between px-4 border-b border-[#223649] bg-[#101922]/80 backdrop-blur-md sticky top-0 z-30">
+            class="h-16 flex lg:hidden items-center justify-between px-4 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-30">
             <div class="flex items-center gap-3">
                 <button id="sidebar-toggle"
-                    class="p-2 -ml-2 text-[#90adcb] hover:text-white rounded-lg hover:bg-white/5 transition-colors">
+                    class="p-2 -ml-2 text-text-muted hover:text-text-main rounded-lg hover:bg-surface transition-colors">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <span class="font-bold text-lg text-white">Financial One</span>
+                <span class="font-bold text-lg text-text-main">Financial One</span>
             </div>
 
             <!-- Empty Header Right -->
@@ -157,6 +218,7 @@
     </main>
 
     <script>
+        // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         const toggleBtn = document.getElementById('sidebar-toggle');
@@ -168,7 +230,6 @@
                 // Open
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
-                // slight delay to allow display:block to apply
                 requestAnimationFrame(() => {
                     overlay.classList.remove('opacity-0');
                 });
@@ -178,12 +239,51 @@
                 overlay.classList.add('opacity-0');
                 setTimeout(() => {
                     overlay.classList.add('hidden');
-                }, 300); // match transition duration
+                }, 300);
             }
         }
 
         if (toggleBtn) {
             toggleBtn.addEventListener('click', toggleSidebar);
+        }
+
+        // Theme Toggle Logic
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        function updateThemeUI(isDark) {
+            if (themeIcon) {
+                if (isDark) {
+                    themeIcon.textContent = 'light_mode';
+                    if (themeText) themeText.textContent = 'Light Mode';
+                } else {
+                    themeIcon.textContent = 'dark_mode';
+                    if (themeText) themeText.textContent = 'Dark Mode';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.theme = 'light';
+                updateThemeUI(false);
+            } else {
+                html.classList.add('dark');
+                localStorage.theme = 'dark';
+                updateThemeUI(true);
+            }
+
+            // Dispatch event for charts
+            window.dispatchEvent(new Event('themeChanged'));
+        }
+
+        // Initialize Theme UI (Class is already set in Head)
+        if (html.classList.contains('dark')) {
+            updateThemeUI(true);
+        } else {
+            updateThemeUI(false);
         }
     </script>
 </body>

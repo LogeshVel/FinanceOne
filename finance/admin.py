@@ -23,7 +23,7 @@ class RetirementAdmin(admin.ModelAdmin):
 
 @admin.register(Insurance)
 class InsuranceAdmin(admin.ModelAdmin):
-    list_display = ('provider', 'premium', 'renewal_date', 'user')
+    list_display = ('provider', 'premium', 'purchase_date', 'user')
     list_filter = ('user',)
 
 @admin.register(Loan)

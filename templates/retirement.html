@@ -6,11 +6,11 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
         <div>
-            <h1 class="text-white text-3xl md:text-4xl font-black tracking-tight mb-2">Retirement Portfolio</h1>
-            <p class="text-[#90adcb] text-base">Track and manage your retirement assets and contributions.</p>
+            <h1 class="text-text-main text-3xl md:text-4xl font-black tracking-tight mb-2">Retirement Portfolio</h1>
+            <p class="text-text-muted text-base">Track and manage your retirement assets and contributions.</p>
         </div>
         <button onclick="document.getElementById('retirementModal').showModal()"
-            class="bg-[#0d7ff2] hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
+            class="bg-primary hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
             <span class="material-symbols-outlined text-[20px]">add</span>
             Add Asset
         </button>
@@ -19,30 +19,30 @@
     <!-- Stats Row -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Total Corpus -->
-        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+        <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[#90adcb] text-sm font-medium uppercase tracking-wider">Total Corpus</span>
-                <span class="material-symbols-outlined text-[#223649] text-3xl">account_balance_wallet</span>
+                <span class="text-text-muted text-sm font-medium uppercase tracking-wider">Total Corpus</span>
+                <span class="material-symbols-outlined text-border text-3xl">account_balance_wallet</span>
             </div>
-            <div class="text-white text-4xl font-bold mb-3">₹{{ corpus|intcomma }}</div>
+            <div class="text-text-main text-4xl font-bold mb-3">₹{{ corpus|intcomma }}</div>
             <div class="flex items-center gap-2">
                 <span
                     class="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                     <span class="material-symbols-outlined text-[14px]">trending_up</span> +{{ growth_pct }}%
                 </span>
-                <span class="text-[#90adcb] text-xs">avg. annual return</span>
+                <span class="text-text-muted text-xs">avg. annual return</span>
             </div>
         </div>
 
         <!-- Monthly Contribution -->
-        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+        <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[#90adcb] text-sm font-medium uppercase tracking-wider">Monthly Contribution</span>
-                <span class="material-symbols-outlined text-[#223649] text-3xl">savings</span>
+                <span class="text-text-muted text-sm font-medium uppercase tracking-wider">Monthly Contribution</span>
+                <span class="material-symbols-outlined text-border text-3xl">savings</span>
             </div>
-            <div class="text-white text-4xl font-bold mb-3">₹{{ total_contribution|intcomma }}</div>
+            <div class="text-text-main text-4xl font-bold mb-3">₹{{ total_contribution|intcomma }}</div>
             <div class="flex items-center gap-2">
-                <span class="text-[#90adcb] text-xs">Total monthly savings towards retirement</span>
+                <span class="text-text-muted text-xs">Total monthly savings towards retirement</span>
             </div>
         </div>
     </div>
@@ -51,15 +51,15 @@
     <div class="flex flex-col gap-6">
 
         <!-- Asset List Table -->
-        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl overflow-hidden">
+        <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl overflow-hidden">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-white text-lg font-bold">Holdings</h3>
+                <h3 class="text-text-main text-lg font-bold">Holdings</h3>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="text-[#90adcb] text-xs uppercase border-b border-[#223649]">
+                        <tr class="text-text-muted text-xs uppercase border-b border-border">
                             <th class="py-3 font-semibold">Asset / Provider</th>
                             <th class="py-3 font-semibold">Type</th>
                             <th class="py-3 font-semibold text-right">Contribution (Mo)</th>
@@ -69,18 +69,19 @@
                     </thead>
                     <tbody class="text-sm">
                         {% for item in retirements %}
-                        <tr class="border-b border-[#223649]/50 hover:bg-[#223649]/30 transition-colors last:border-0">
-                            <td class="py-4 text-white font-medium">
+                        <tr class="border-b border-border/50 hover:bg-card-hover/30 transition-colors last:border-0">
+                            <td class="py-4 text-text-main font-medium">
                                 {{ item.provider }}
                             </td>
-                            <td class="py-4 text-[#90adcb]">
-                                <span class="bg-[#223649] px-2 py-1 rounded text-xs text-white border border-[#586e82]">
+                            <td class="py-4 text-text-muted">
+                                <span
+                                    class="bg-card-hover px-2 py-1 rounded text-xs text-text-main border border-border">
                                     {{ item.account_type }}</span>
                             </td>
-                            <td class="py-4 text-white text-right">
+                            <td class="py-4 text-text-main text-right">
                                 ₹{{ item.monthly_contribution|intcomma }}
                             </td>
-                            <td class="py-4 text-white font-bold text-right">
+                            <td class="py-4 text-text-main font-bold text-right">
                                 ₹{{ item.balance|intcomma }}
                             </td>
                             <td class="py-4 text-center">
@@ -108,16 +109,16 @@
 
 <!-- Retirement Modal -->
 <dialog id="retirementModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
-    <div class="bg-[#1b2733] border border-[#223649] text-white rounded-xl shadow-2xl p-6">
-        <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-6">
-            <span class="material-symbols-outlined text-[#0d7ff2]">add_circle</span> Add Asset
+    <div class="bg-surface border border-border text-text-main rounded-xl shadow-2xl p-6">
+        <h3 class="text-text-main text-lg font-bold flex items-center gap-2 mb-6">
+            <span class="material-symbols-outlined text-primary">add_circle</span> Add Asset
         </h3>
         <form method="POST" class="flex flex-col gap-5">
             {% csrf_token %}
             <div class="space-y-1">
-                <label class="text-[#90adcb] text-xs uppercase font-bold">Account Type</label>
+                <label class="text-text-muted text-xs uppercase font-bold">Account Type</label>
                 <select name="account_type"
-                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all">
+                    class="w-full bg-background border border-border text-text-main rounded-lg p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                     <option value="NPS">NPS (National Pension System)</option>
                     <option value="EPF">EPF (Employees' Provident Fund)</option>
                     <option value="PPF">PPF (Public Provident Fund)</option>
@@ -131,43 +132,43 @@
             </div>
 
             <div class="space-y-1">
-                <label class="text-[#90adcb] text-xs uppercase font-bold">Provider / Name</label>
+                <label class="text-text-muted text-xs uppercase font-bold">Provider / Name</label>
                 <input type="text" name="provider" required
-                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                    class="w-full bg-background border border-border text-text-main rounded-lg p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-text-muted/50"
                     placeholder="e.g. HDFC, Vanguard, Employer">
             </div>
 
             <div class="space-y-1">
-                <label class="text-[#90adcb] text-xs uppercase font-bold">Current Balance</label>
+                <label class="text-text-muted text-xs uppercase font-bold">Current Balance</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">₹</span>
                     <input type="number" name="balance" step="0.01" required
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                        class="w-full bg-background border border-border text-text-main rounded-lg pl-8 p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-text-muted/50"
                         placeholder="0.00">
                 </div>
             </div>
 
             <div class="space-y-1">
-                <label class="text-[#90adcb] text-xs uppercase font-bold">Monthly Contribution</label>
+                <label class="text-text-muted text-xs uppercase font-bold">Monthly Contribution</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#586e82]">₹</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">₹</span>
                     <input type="number" name="monthly_contribution" step="0.01" required
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg pl-8 p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]"
+                        class="w-full bg-background border border-border text-text-main rounded-lg pl-8 p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-text-muted/50"
                         placeholder="0.00">
                 </div>
             </div>
 
             <div class="space-y-1">
-                <label class="text-[#90adcb] text-xs uppercase font-bold">Expected Return (%)</label>
+                <label class="text-text-muted text-xs uppercase font-bold">Expected Return (%)</label>
                 <input type="number" name="return_rate" step="0.01" value="7.00" required
-                    class="w-full bg-[#101922] border border-[#223649] text-white rounded-lg p-3 focus:border-[#0d7ff2] focus:ring-1 focus:ring-[#0d7ff2] outline-none transition-all placeholder-[#586e82]">
+                    class="w-full bg-background border border-border text-text-main rounded-lg p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-text-muted/50">
             </div>
 
             <div class="flex gap-3 mt-4">
                 <button type="button" onclick="document.getElementById('retirementModal').close()"
-                    class="flex-1 border border-[#223649] text-white hover:bg-[#223649] py-3 rounded-lg transition-colors font-medium">Cancel</button>
+                    class="flex-1 border border-border text-text-main hover:bg-card-hover py-3 rounded-lg transition-colors font-medium">Cancel</button>
                 <button type="submit"
-                    class="flex-1 bg-[#0d7ff2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                    class="flex-1 bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
                     Save Asset
                 </button>
             </div>

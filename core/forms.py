@@ -4,15 +4,15 @@ from .models import UserProfile, Budget, FinancialGoal
 
 class UserRegistrationForm(forms.ModelForm):
     first_name = forms.CharField(max_length=150, required=True, widget=forms.TextInput(attrs={
-        'class': 'bg-[#101922] border border-[#223649] text-white placeholder:text-[#586e82] focus:border-[#0d7ff2] rounded-md p-2 w-full',
+        'class': 'bg-background border border-border text-text-main placeholder-text-muted focus:border-primary rounded-md p-2 w-full',
         'placeholder': 'John Doe'
     }))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
-        'class': 'bg-[#101922] border border-[#223649] text-white placeholder:text-[#586e82] focus:border-[#0d7ff2] rounded-md p-2 w-full',
+        'class': 'bg-background border border-border text-text-main placeholder-text-muted focus:border-primary rounded-md p-2 w-full',
         'placeholder': 'you@example.com'
     }))
     password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'bg-[#101922] border border-[#223649] text-white placeholder:text-[#586e82] focus:border-[#0d7ff2] rounded-md p-2 w-full',
+        'class': 'bg-background border border-border text-text-main placeholder-text-muted focus:border-primary rounded-md p-2 w-full',
         'placeholder': 'Min 6 characters'
     }))
     currency = forms.ChoiceField(choices=[
@@ -27,7 +27,7 @@ class UserRegistrationForm(forms.ModelForm):
         ('AUD', 'Australian Dollar (A$)'),
         ('CAD', 'Canadian Dollar (C$)'),
     ], initial='INR', widget=forms.Select(attrs={
-        'class': 'bg-[#101922] border border-[#223649] text-white rounded-md p-2 w-full focus:outline-none focus:border-[#0d7ff2]'
+        'class': 'bg-background border border-border text-text-main rounded-md p-2 w-full focus:outline-none focus:border-primary'
     }))
 
     class Meta:
@@ -55,20 +55,20 @@ class BudgetCreationForm(forms.ModelForm):
         model = Budget
         fields = ['name']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
+            'name': forms.TextInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted'}),
         }
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['copy_from'].queryset = Budget.objects.filter(user=user).order_by('-updated_at')
-        self.fields['copy_from'].widget.attrs.update({'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'})
+        self.fields['copy_from'].widget.attrs.update({'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary'})
 
 class MonthlyBudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
         fields = ['monthly_income']
         widgets = {
-            'monthly_income': forms.NumberInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'}),
+            'monthly_income': forms.NumberInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary'}),
         }
 
 class YearlyBudgetForm(forms.ModelForm):
@@ -76,7 +76,7 @@ class YearlyBudgetForm(forms.ModelForm):
         model = Budget
         fields = ['yearly_income']
         widgets = {
-            'yearly_income': forms.NumberInput(attrs={'class': 'w-full bg-[#1b2733] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'}),
+            'yearly_income': forms.NumberInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary'}),
         }
 
 class FinancialGoalForm(forms.ModelForm):
@@ -84,11 +84,11 @@ class FinancialGoalForm(forms.ModelForm):
         model = FinancialGoal
         fields = ['category', 'name', 'description', 'target_amount', 'current_amount', 'target_date', 'funding_strategy']
         widgets = {
-            'category': forms.Select(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2]'}),
-            'name': forms.TextInput(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
-            'description': forms.Textarea(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500', 'rows': 2}),
-            'target_amount': forms.NumberInput(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
-            'current_amount': forms.NumberInput(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
-            'target_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500'}),
-            'funding_strategy': forms.Textarea(attrs={'class': 'w-full bg-[#101922] border border-[#223649] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0d7ff2] placeholder-gray-500', 'rows': 2}),
+            'category': forms.Select(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary'}),
+            'name': forms.TextInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted'}),
+            'description': forms.Textarea(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted', 'rows': 2}),
+            'target_amount': forms.NumberInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted'}),
+            'current_amount': forms.NumberInput(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted'}),
+            'target_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted'}),
+            'funding_strategy': forms.Textarea(attrs={'class': 'w-full bg-background border border-border text-text-main rounded-lg px-4 py-3 focus:outline-none focus:border-primary placeholder-text-muted', 'rows': 2}),
         }

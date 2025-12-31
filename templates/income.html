@@ -8,8 +8,8 @@
         <!-- Breadcrumb Removed -->
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <h1 class="text-white text-3xl md:text-4xl font-bold tracking-tight">Income Management</h1>
-                <p class="text-[#90adcb] text-base mt-1">Track and manage your revenue streams effectively.</p>
+                <h1 class="text-text-main text-3xl md:text-4xl font-bold tracking-tight">Income Management</h1>
+                <p class="text-text-muted text-base mt-1">Track and manage your revenue streams effectively.</p>
             </div>
             <button onclick="document.getElementById('incomeModal').showModal()"
                 class="bg-[#0d7ff2] hover:bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors">
@@ -21,72 +21,72 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+        <div class="bg-surface border border-border rounded-xl p-6">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-[#90adcb] text-sm font-medium">Total Monthly Income</p>
-                <div class="p-1.5 rounded-md bg-[#223649]/50 text-[#0d7ff2]">
+                <p class="text-text-muted text-sm font-medium">Total Monthly Income</p>
+                <div class="p-1.5 rounded-md bg-card-hover text-primary">
                     <span class="material-symbols-outlined">calendar_today</span>
                 </div>
             </div>
-            <p class="text-white text-3xl font-bold">₹{{ monthly_total|intcomma }}</p>
-            <p class="text-[#586e82] text-xs mt-2">From {{ active_count }} active sources</p>
+            <p class="text-text-main text-3xl font-bold">₹{{ monthly_total|intcomma }}</p>
+            <p class="text-text-muted text-xs mt-2">From {{ active_count }} active sources</p>
         </div>
-        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+        <div class="bg-surface border border-border rounded-xl p-6">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-[#90adcb] text-sm font-medium">Projected Annual</p>
-                <div class="p-1.5 rounded-md bg-[#223649]/50 text-purple-400">
+                <p class="text-text-muted text-sm font-medium">Projected Annual</p>
+                <div class="p-1.5 rounded-md bg-card-hover text-purple-400">
                     <span class="material-symbols-outlined">trending_up</span>
                 </div>
             </div>
-            <p class="text-white text-3xl font-bold">₹{{ yearly_total|intcomma }}</p>
-            <p class="text-[#586e82] text-xs mt-2">Based on recurring active streams</p>
+            <p class="text-text-main text-3xl font-bold">₹{{ yearly_total|intcomma }}</p>
+            <p class="text-text-muted text-xs mt-2">Based on recurring active streams</p>
         </div>
-        <div class="bg-[#1b2733] border border-[#223649] rounded-xl p-6">
+        <div class="bg-surface border border-border rounded-xl p-6">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-[#90adcb] text-sm font-medium">Active Sources</p>
-                <div class="p-1.5 rounded-md bg-[#223649]/50 text-amber-400">
+                <p class="text-text-muted text-sm font-medium">Active Sources</p>
+                <div class="p-1.5 rounded-md bg-card-hover text-amber-400">
                     <span class="material-symbols-outlined">layers</span>
                 </div>
             </div>
-            <p class="text-white text-3xl font-bold">{{ active_count }}</p>
-            <p class="text-[#586e82] text-xs mt-2">{{ inactive_count }} inactive sources</p>
+            <p class="text-text-main text-3xl font-bold">{{ active_count }}</p>
+            <p class="text-text-muted text-xs mt-2">{{ inactive_count }} inactive sources</p>
         </div>
     </div>
 
     <!-- Income Table -->
-    <div class="bg-[#1b2733] border border-[#223649] rounded-xl overflow-hidden">
-        <div class="flex flex-wrap items-center justify-between p-4 border-b border-[#223649] gap-4">
-            <h3 class="text-white font-semibold text-lg">Income Sources</h3>
+    <div class="bg-surface border border-border rounded-xl overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between p-4 border-b border-border gap-4">
+            <h3 class="text-text-main font-semibold text-lg">Income Sources</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-[#101922] border-b border-[#223649]">
-                        <th class="p-4 text-[#90adcb] font-medium text-sm">Source Name</th>
-                        <th class="p-4 text-[#90adcb] font-medium text-sm">Type</th>
-                        <th class="p-4 text-[#90adcb] font-medium text-sm">Frequency</th>
-                        <th class="p-4 text-[#90adcb] font-medium text-sm text-right">Amount</th>
-                        <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Status</th>
-                        <th class="p-4 text-[#90adcb] font-medium text-sm text-center">Action</th>
+                    <tr class="bg-background border-b border-border">
+                        <th class="p-4 text-text-muted font-medium text-sm">Source Name</th>
+                        <th class="p-4 text-text-muted font-medium text-sm">Type</th>
+                        <th class="p-4 text-text-muted font-medium text-sm">Frequency</th>
+                        <th class="p-4 text-text-muted font-medium text-sm text-right">Amount</th>
+                        <th class="p-4 text-text-muted font-medium text-sm text-center">Status</th>
+                        <th class="p-4 text-text-muted font-medium text-sm text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for income in incomes %}
-                    <tr class="border-b border-[#223649] hover:bg-[#101922]/50 group transition-colors">
-                        <td class="p-4 text-white font-medium">
+                    <tr class="border-b border-border hover:bg-card-hover group transition-colors">
+                        <td class="p-4 text-text-main font-medium">
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="w-8 h-8 rounded flex items-center justify-center bg-[#223649] text-[#90adcb]">
+                                    class="w-8 h-8 rounded flex items-center justify-center bg-card-hover text-text-muted">
                                     <span class="material-symbols-outlined text-lg">category</span>
                                 </div>
                                 {{ income.source_name }}
                             </div>
                         </td>
-                        <td class="p-4 text-[#90adcb]">{{ income.type }}</td>
-                        <td class="p-4 text-[#90adcb]">
-                            <span class="px-2 py-1 rounded bg-[#223649] text-xs">{{ income.frequency }}</span>
+                        <td class="p-4 text-text-muted">{{ income.type }}</td>
+                        <td class="p-4 text-text-muted">
+                            <span class="px-2 py-1 rounded bg-card-hover text-xs">{{ income.frequency }}</span>
                         </td>
-                        <td class="p-4 text-white text-right font-medium">₹{{ income.amount|intcomma }}</td>
+                        <td class="p-4 text-text-main text-right font-medium">₹{{ income.amount|intcomma }}</td>
                         <td class="p-4 text-center">
                             {% if income.status == 'Active' %}
                             <span
@@ -95,8 +95,8 @@
                             </span>
                             {% else %}
                             <span
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#223649] text-[#90adcb] border border-[#314d68]">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#90adcb]"></span> Inactive
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-card-hover text-text-muted border border-border">
+                                <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span> Inactive
                             </span>
                             {% endif %}
                         </td>
@@ -110,7 +110,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-[#90adcb]">No income sources found. Add your first
+                        <td colspan="6" class="p-8 text-center text-text-muted">No income sources found. Add your first
                             income!</td>
                     </tr>
                     {% endfor %}
@@ -122,33 +122,33 @@
 
 <!-- Modal -->
 <dialog id="incomeModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
-    <div class="bg-[#1b2733] border border-[#223649] text-white rounded-xl shadow-2xl p-6">
+    <div class="bg-surface border border-border text-text-main rounded-xl shadow-2xl p-6">
         <h2 class="text-xl font-bold mb-4">Add New Income</h2>
         <form method="POST" action="{% url 'income' %}" class="flex flex-col gap-4">
             {% csrf_token %}
             <div class="flex flex-col gap-2">
-                <label class="text-[#90adcb] text-sm">Income Source Name</label>
+                <label class="text-text-muted text-sm">Income Source Name</label>
                 <input name="source_name"
-                    class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                    class="bg-background border border-border text-text-main rounded-md p-2 focus:outline-none focus:border-primary"
                     required placeholder="e.g. Salary">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2 relative" id="incomeTypeCombobox">
-                    <label class="text-[#90adcb] text-sm">Type</label>
+                    <label class="text-text-muted text-sm">Type</label>
                     <div class="relative">
                         <input type="text" id="incomeTypeSearch"
-                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            class="w-full bg-background border border-border text-text-main rounded-md p-2 focus:outline-none focus:border-primary"
                             placeholder="Select Type..." autocomplete="off">
                         <input type="hidden" name="type" id="incomeTypeHidden">
-                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#90adcb]">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
                             <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
                         </div>
 
                         <!-- Dropdown Options -->
                         <div id="incomeTypeList"
-                            class="hidden absolute z-50 w-full mt-1 bg-[#1b2733] border border-[#223649] rounded-md shadow-xl max-h-48 overflow-y-auto">
+                            class="hidden absolute z-50 w-full mt-1 bg-surface border border-border rounded-md shadow-xl max-h-48 overflow-y-auto">
                             {% for type in income_types %}
-                            <div class="income-option px-3 py-2 hover:bg-[#223649] cursor-pointer text-white text-sm transition-colors border-b border-[#223649]/50 last:border-0"
+                            <div class="income-option px-3 py-2 hover:bg-card-hover cursor-pointer text-text-main text-sm transition-colors border-b border-border last:border-0"
                                 data-value="{{ type }}">
                                 {{ type }}
                             </div>
@@ -157,9 +157,9 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="text-[#90adcb] text-sm">Frequency</label>
+                    <label class="text-text-muted text-sm">Frequency</label>
                     <select name="frequency"
-                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
+                        class="bg-background border border-border text-text-main rounded-md p-2 focus:outline-none focus:border-primary">
                         <option value="Monthly">Monthly</option>
                         <option value="Quarterly">Quarterly</option>
                         <option value="Half-Yearly">Half-Yearly</option>
@@ -168,15 +168,15 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <label class="text-[#90adcb] text-sm">Amount</label>
+                <label class="text-text-muted text-sm">Amount</label>
                 <input type="number" step="0.01" name="amount"
-                    class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                    class="bg-background border border-border text-text-main rounded-md p-2 focus:outline-none focus:border-primary"
                     required placeholder="0.00">
             </div>
 
             <div class="flex gap-3 mt-4">
                 <button type="button" onclick="document.getElementById('incomeModal').close()"
-                    class="flex-1 border border-[#223649] text-white hover:bg-[#223649] py-2 rounded-md transition-colors">Cancel</button>
+                    class="flex-1 border border-border text-text-main hover:bg-card-hover py-2 rounded-md transition-colors">Cancel</button>
                 <button type="submit"
                     class="flex-1 bg-[#0d7ff2] hover:bg-blue-600 text-white py-2 rounded-md transition-colors">Save
                     Income</button>

@@ -95,7 +95,7 @@ class Insurance(models.Model):
     policy_number = models.CharField(max_length=100)
     premium = models.DecimalField(max_digits=10, decimal_places=2)
     premium_frequency = models.CharField(max_length=20, default='Monthly')
-    renewal_date = models.DateField()
+    purchase_date = models.DateField()
     status = models.CharField(max_length=20, default='Active')
     created_at = models.DateTimeField(auto_now_add=True)
 

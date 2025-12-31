@@ -6,10 +6,10 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
         <div>
-            <h1 class="text-white text-3xl md:text-4xl font-black tracking-tight mb-2">
+            <h1 class="text-text-main text-3xl md:text-4xl font-black tracking-tight mb-2">
                 Welcome back, {{ request.user.first_name|default:request.user.username }}
             </h1>
-            <p class="text-[#90adcb] text-base">Here is your financial health summary for today.</p>
+            <p class="text-text-muted text-base">Here is your financial health summary for today.</p>
         </div>
         <!-- Button Removed -->
     </div>
@@ -17,30 +17,30 @@
     <!-- Main Grid -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <!-- Net Worth -->
-        <div class="xl:col-span-2 bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+        <div class="xl:col-span-2 bg-surface border border-border rounded-2xl p-6 shadow-xl">
             <div class="flex justify-between items-start mb-6">
                 <div class="w-full">
-                    <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Total Net Worth</p>
+                    <p class="text-text-muted text-sm font-medium uppercase tracking-wider mb-1">Total Net Worth</p>
 
                     <details class="group relative">
                         <summary class="flex items-center gap-3 cursor-pointer list-none">
-                            <h3 class="text-white text-4xl font-bold tracking-tight">₹{{ net_worth|intcomma }}</h3>
+                            <h3 class="text-text-main text-4xl font-bold tracking-tight">₹{{ net_worth|intcomma }}</h3>
                             <span
-                                class="material-symbols-outlined text-[#90adcb] hover:text-white transition-transform group-open:rotate-180 text-3xl mt-1 select-none">expand_circle_down</span>
+                                class="material-symbols-outlined text-text-muted hover:text-text-main transition-transform group-open:rotate-180 text-3xl mt-1 select-none">expand_circle_down</span>
                         </summary>
 
                         <div
-                            class="mt-4 pt-4 space-y-2 text-sm text-[#90adcb] border-t border-[#223649] animate-fade-in-down">
-                            <div class="flex justify-between items-center rounded p-2 hover:bg-[#223649]/30">
+                            class="mt-4 pt-4 space-y-2 text-sm text-text-muted border-t border-border animate-fade-in-down">
+                            <div class="flex justify-between items-center rounded p-2 hover:bg-card-hover">
                                 <span>Total Assets</span>
-                                <span class="font-bold text-white">₹{{ total_assets|intcomma }}</span>
+                                <span class="font-bold text-text-main">₹{{ total_assets|intcomma }}</span>
                             </div>
-                            <div class="flex justify-between items-center rounded p-2 hover:bg-[#223649]/30">
+                            <div class="flex justify-between items-center rounded p-2 hover:bg-card-hover">
                                 <span>Retirement Corpus</span>
-                                <span class="font-bold text-white">₹{{ total_retirement|intcomma }}</span>
+                                <span class="font-bold text-text-main">₹{{ total_retirement|intcomma }}</span>
                             </div>
-                            <div class="border-t border-[#223649] my-1"></div>
-                            <div class="flex justify-between items-center bg-[#223649]/50 rounded p-2">
+                            <div class="border-t border-border my-1"></div>
+                            <div class="flex justify-between items-center bg-card-hover rounded p-2">
                                 <span class="text-green-400 font-medium">Net Worth</span>
                                 <span class="font-bold text-green-400">₹{{ net_worth|intcomma }}</span>
                             </div>
@@ -50,16 +50,16 @@
             </div>
 
             <!-- Real Net Worth -->
-            <div class="mt-6 border-t border-[#223649] pt-6">
-                <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Real Net Worth</p>
+            <div class="mt-6 border-t border-border pt-6">
+                <p class="text-text-muted text-sm font-medium uppercase tracking-wider mb-1">Real Net Worth</p>
                 <div class="flex items-center gap-2 mb-2">
                     <h3 class="text-emerald-400 text-3xl font-bold tracking-tight">₹{{ real_net_worth|intcomma }}</h3>
                     <div class="group relative">
-                        <span class="material-symbols-outlined text-[#586e82] text-sm cursor-help">info</span>
+                        <span class="material-symbols-outlined text-text-muted text-sm cursor-help">info</span>
                         <div
-                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-[#101922] border border-[#223649] rounded-lg p-3 text-xs text-[#90adcb] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl z-50">
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-surface border border-border rounded-lg p-3 text-xs text-text-muted opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl z-50">
                             <div class="space-y-1">
-                                <div class="flex justify-between"><span>Assets:</span> <span class="text-white">
+                                <div class="flex justify-between"><span>Assets:</span> <span class="text-text-main">
                                         ₹{{total_assets|add:total_retirement|intcomma }}</span></div>
                                 <div class="flex justify-between text-red-400"><span>- Outstanding Loans:</span>
                                     <span>₹{{ total_outstanding_loans|intcomma }}</span>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <div class="mt-2 text-xs text-[#586e82] flex flex-wrap gap-2">
+                <div class="mt-2 text-xs text-text-muted flex flex-wrap gap-2">
                     <span class="whitespace-nowrap">(Assets: ₹{{ total_assets|add:total_retirement|intcomma }})</span>
                     <span>-</span>
                     <span class="whitespace-nowrap">(Loans: ₹{{ total_outstanding_loans|intcomma }})</span>
@@ -90,10 +90,10 @@
         </div>
 
         <!-- Assets Allocation -->
-        <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
+        <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
             <div>
-                <p class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-1">Assets Allocation</p>
-                <h3 class="text-white text-2xl font-bold">₹{{ total_assets|intcomma }}</h3>
+                <p class="text-text-muted text-sm font-medium uppercase tracking-wider mb-1">Assets Allocation</p>
+                <h3 class="text-text-main text-2xl font-bold">₹{{ total_assets|intcomma }}</h3>
             </div>
 
             <div class="h-48 flex items-center justify-center mt-4">
@@ -111,12 +111,12 @@
         <!-- Income & Expense Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 xl:col-span-3">
             <!-- Income Section -->
-            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
-                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current Year Income</h3>
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
+                <h3 class="text-text-muted text-sm font-medium uppercase tracking-wider mb-4">Current Year Income</h3>
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_current_income|intcomma }}</h2>
-                        <p class="text-[#586e82] text-xs">Annualized Projection</p>
+                        <h2 class="text-text-main text-3xl font-bold mb-2">₹{{ total_current_income|intcomma }}</h2>
+                        <p class="text-text-muted text-xs">Annualized Projection</p>
                     </div>
                     <div class="h-32 w-32">
                         <canvas id="incomeChart"></canvas>
@@ -125,12 +125,12 @@
             </div>
 
             <!-- Expense Section -->
-            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
-                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current Year Expense</h3>
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
+                <h3 class="text-text-muted text-sm font-medium uppercase tracking-wider mb-4">Current Year Expense</h3>
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_current_expense|intcomma }}</h2>
-                        <p class="text-[#586e82] text-xs">Year to Date</p>
+                        <h2 class="text-text-main text-3xl font-bold mb-2">₹{{ total_current_expense|intcomma }}</h2>
+                        <p class="text-text-muted text-xs">Year to Date</p>
                     </div>
                     <div class="h-32 w-32">
                         <canvas id="expenseChart"></canvas>
@@ -142,13 +142,13 @@
         <!-- Loans & Insurance Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 xl:col-span-3">
             <!-- Loans Section -->
-            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
-                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current year Total EMIs
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
+                <h3 class="text-text-muted text-sm font-medium uppercase tracking-wider mb-4">Current year Total EMIs
                 </h3>
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_annual_emi|intcomma }}</h2>
-                        <p class="text-[#586e82] text-xs">Annualized Obligation</p>
+                        <h2 class="text-text-main text-3xl font-bold mb-2">₹{{ total_annual_emi|intcomma }}</h2>
+                        <p class="text-text-muted text-xs">Annualized Obligation</p>
                     </div>
                     <div class="h-32 w-32">
                         <canvas id="loanChart"></canvas>
@@ -157,14 +157,14 @@
             </div>
 
             <!-- Insurance Section -->
-            <div class="bg-[#1b2733] border border-[#223649] rounded-2xl p-6 shadow-xl">
-                <h3 class="text-[#90adcb] text-sm font-medium uppercase tracking-wider mb-4">Current year Total
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-xl">
+                <h3 class="text-text-muted text-sm font-medium uppercase tracking-wider mb-4">Current year Total
                     Insurance Premium
                 </h3>
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-white text-3xl font-bold mb-2">₹{{ total_annual_premium|intcomma }}</h2>
-                        <p class="text-[#586e82] text-xs">Annualized Premium</p>
+                        <h2 class="text-text-main text-3xl font-bold mb-2">₹{{ total_annual_premium|intcomma }}</h2>
+                        <p class="text-text-muted text-xs">Annualized Premium</p>
                     </div>
                     <div class="h-32 w-32">
                         <canvas id="insuranceChart"></canvas>
@@ -180,9 +180,29 @@
             // Functionality removed as chart is removed
         }
 
+        // Chart instances
+        window.assetDoughnut = null;
+        window.incomeChart = null;
+        window.expenseChart = null;
+        window.loanChart = null;
+        window.insuranceChart = null;
+
+        // Shared Options
+        const getChartOptions = (cutout = '70%', legendPosition = 'bottom') => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: legendPosition,
+                    labels: { color: 'var(--text-secondary)' }
+                }
+            },
+            cutout: cutout
+        });
+
         // Asset Doughnut
         const ctxAsset = document.getElementById('assetDoughnut');
-        new Chart(ctxAsset, {
+        window.assetDoughnut = new Chart(ctxAsset, {
             type: 'doughnut',
             data: {
                 labels: {{ asset_labels| safe }},
@@ -192,21 +212,11 @@
             borderWidth: 0
             }]
         },
-            options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#fff' }
-                }
-            },
-            cutout: '70%'
-        }
+            options: getChartOptions('70%', 'bottom')
     });
 
         // Income Doughnut
-        new Chart(document.getElementById('incomeChart'), {
+        window.incomeChart = new Chart(document.getElementById('incomeChart'), {
             type: 'doughnut',
             data: {
                 labels: {{ income_chart_labels| safe }},
@@ -220,7 +230,7 @@
     });
 
         // Expense Doughnut
-        new Chart(document.getElementById('expenseChart'), {
+        window.expenseChart = new Chart(document.getElementById('expenseChart'), {
             type: 'doughnut',
             data: {
                 labels: {{ expense_chart_labels| safe }},
@@ -234,7 +244,7 @@
     });
 
         // Loan Doughnut
-        new Chart(document.getElementById('loanChart'), {
+        window.loanChart = new Chart(document.getElementById('loanChart'), {
             type: 'doughnut',
             data: {
                 labels: {{ loan_chart_labels| safe }},
@@ -248,7 +258,7 @@
     });
 
         // Insurance Doughnut
-        new Chart(document.getElementById('insuranceChart'), {
+        window.insuranceChart = new Chart(document.getElementById('insuranceChart'), {
             type: 'doughnut',
             data: {
                 labels: {{ insurance_chart_labels| safe }},
@@ -260,5 +270,19 @@
         },
             options: { cutout: '70%', plugins: { legend: { display: false } } }
     });
+
+        // Theme Update Logic
+        function updateDashboardChartsTheme() {
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+
+            if (window.assetDoughnut) {
+                window.assetDoughnut.options.plugins.legend.labels.color = textColor;
+                window.assetDoughnut.update();
+            }
+            // Other charts have legend hidden, so no need to update specific colors unless borders/etc exist.
+            // But good to have structure ready.
+        }
+
+        document.addEventListener('themeChanged', updateDashboardChartsTheme);
     </script>
     {% endblock %}

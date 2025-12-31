@@ -488,7 +488,8 @@ def insurance_view(request):
             type=request.POST.get('type'),
             policy_number=request.POST.get('policy_number'),
             premium=request.POST.get('premium'),
-            renewal_date=request.POST.get('renewal_date')
+            premium_frequency=request.POST.get('premium_frequency'),
+            purchase_date=request.POST.get('purchase_date')
         )
         
     insurance_list = Insurance.objects.filter(user=user)

@@ -1,14 +1,14 @@
 {% load humanize %}
 {% for loan in loans %}
-<tr class="border-b border-[#223649] hover:bg-[#101922]/50 transition-colors">
-    <td class="p-4 text-white font-medium">{{ loan.lender_name }}</td>
+<tr class="border-b border-border hover:bg-card-hover transition-colors">
+    <td class="p-4 text-text-main font-medium">{{ loan.lender_name }}</td>
     <td class="p-4">
         <span
-            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#223649] text-[#90adcb]">
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-card-hover text-text-muted">
             {{ loan.loan_type }}
         </span>
     </td>
-    <td class="p-4 text-sm text-[#90adcb]">
+    <td class="p-4 text-sm text-text-muted">
         {{ loan.interest_rate }}% • {{ loan.tenure }} Years
     </td>
     <td class="p-4 text-right text-sm font-bold text-orange-400">
@@ -17,7 +17,7 @@
     <td class="p-4 text-right text-sm font-bold text-red-400">
         ₹{{ loan.outstanding_amount|intcomma }}
     </td>
-    <td class="p-4 text-right text-sm font-bold text-[#586e82]">
+    <td class="p-4 text-right text-sm font-bold text-text-muted">
         ₹{{ loan.amount|intcomma }}
     </td>
     <td class="p-4 text-center">
@@ -29,6 +29,6 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="7" class="p-8 text-center text-[#90adcb]">No loans found</td>
+    <td colspan="7" class="p-8 text-center text-text-muted">No loans found</td>
 </tr>
 {% endfor %}

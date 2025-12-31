@@ -1,21 +1,21 @@
 <div
-    class="bg-[#101922] border border-[#223649] rounded-lg p-4 hover:border-{{ color }}-500/50 transition-colors group relative">
+    class="bg-background border border-border rounded-lg p-4 hover:border-{{ color }}-500/50 transition-colors group relative">
     <div class="flex justify-between items-start mb-2">
-        <h4 class="font-bold text-white">{{ goal.name }}</h4>
-        <span class="text-xs text-[#90adcb] bg-[#223649] px-2 py-1 rounded">{{ goal.target_date|date:"M Y" }}</span>
+        <h4 class="font-bold text-text-main">{{ goal.name }}</h4>
+        <span class="text-xs text-text-muted bg-card-hover px-2 py-1 rounded">{{ goal.target_date|date:"M Y" }}</span>
     </div>
 
-    <p class="text-sm text-[#90adcb] mb-3 line-clamp-2">{{ goal.description }}</p>
+    <p class="text-sm text-text-muted mb-3 line-clamp-2">{{ goal.description }}</p>
 
     {% if goal.funding_strategy %}
-    <div class="mb-3 text-xs text-[#90adcb]/80">
-        <span class="font-bold text-[#90adcb]">Strategy:</span> {{ goal.funding_strategy|truncatechars:60 }}
+    <div class="mb-3 text-xs text-text-muted/80">
+        <span class="font-bold text-text-muted">Strategy:</span> {{ goal.funding_strategy|truncatechars:60 }}
     </div>
     {% endif %}
 
     <div class="flex justify-between items-end mb-2">
-        <div class="text-xs text-[#90adcb]">
-            Progress: <span class="text-white font-medium">₹
+        <div class="text-xs text-text-muted">
+            Progress: <span class="text-text-main font-medium">₹
                 {{ goal.current_amount|floatformat:0 }}</span> / ₹
             {{goal.target_amount|floatformat:0 }}
         </div>
@@ -34,15 +34,17 @@
 
     <!-- Progress Bar -->
     <!-- Note: Doing inline math in django templates is tricky without custom tags, so we'll approximate visually or need a custom tag for % width -->
-    <div class="w-full bg-[#223649] h-1.5 rounded-full overflow-hidden">
+    <!-- Progress Bar -->
+    <!-- Note: Doing inline math in django templates is tricky without custom tags, so we'll approximate visually or need a custom tag for % width -->
+    <div class="w-full bg-card-hover h-1.5 rounded-full overflow-hidden">
         <div class="bg-{{ color }}-500 h-full rounded-full transition-all duration-500 ease-out"
             style="width: {{ goal.progress_percentage }}%"></div>
         <!-- Placeholder width. For real width, better calculated in View -->
     </div>
 
     <div
-        class="mt-3 pt-3 border-t border-[#223649]/50 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
-        <span class="text-xs text-[#90adcb]">Created: {{ goal.created_at|date:"M d" }}</span>
+        class="mt-3 pt-3 border-t border-border/50 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <span class="text-xs text-text-muted">Created: {{ goal.created_at|date:"M d" }}</span>
         <div class="flex gap-2">
             <button onclick="openGoalModal({
                 id: '{{ goal.id }}',
@@ -53,7 +55,7 @@
                 current_amount: '{{ goal.current_amount|stringformat:'.1f' }}',
                 target_date: '{{ goal.target_date|date:'Y-m-d' }}',
                 funding_strategy: '{{ goal.funding_strategy|escapejs }}'
-            })" class="text-[#0d7ff2] hover:text-white" title="Edit">
+            })" class="text-primary hover:text-text-main" title="Edit">
                 <span class="material-symbols-outlined text-sm">edit</span>
             </button>
             <a href="{% url 'delete_goal' goal.id %}" onclick="return confirm('Delete this goal?')"
@@ -63,4 +65,3 @@
         </div>
     </div>
 </div>
-```
