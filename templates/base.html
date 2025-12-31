@@ -97,16 +97,6 @@
                         <span class="material-symbols-outlined">receipt_long</span>
                         <span class="text-sm font-medium">Expense</span>
                     </a>
-                    <a href="{% url 'assets' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'assets' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
-                        <span class="material-symbols-outlined">account_balance</span>
-                        <span class="text-sm font-medium">Assets</span>
-                    </a>
-                    <a href="{% url 'retirement' %}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'retirement' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
-                        <span class="material-symbols-outlined">savings</span>
-                        <span class="text-sm font-medium">Retirement</span>
-                    </a>
                     <a href="{% url 'insurance' %}"
                         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'insurance' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">verified_user</span>
@@ -117,6 +107,16 @@
                         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'loans' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">account_balance</span>
                         <span class="text-sm font-medium">Loans</span>
+                    </a>
+                    <a href="{% url 'assets' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'assets' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        <span class="material-symbols-outlined">account_balance</span>
+                        <span class="text-sm font-medium">Assets</span>
+                    </a>
+                    <a href="{% url 'retirement' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group {% if request.resolver_match.url_name == 'retirement' %}bg-[#0d7ff2]/10 text-[#0d7ff2] border-l-4 border-[#0d7ff2]{% else %}text-[#90adcb] hover:bg-[#223649] hover:text-white{% endif %}">
+                        <span class="material-symbols-outlined">savings</span>
+                        <span class="text-sm font-medium">Retirement</span>
                     </a>
                 </nav>
             </div>

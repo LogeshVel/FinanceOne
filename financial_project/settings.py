@@ -147,3 +147,21 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email Configuration
+# For Development: Print emails to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For Production: Use SMTP (Uncomment and configure below)
+# To use SMTP, change EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
+# and set the following variables with your email provider's details.
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'  # e.g., for Gmail
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your_email@example.com'
+# EMAIL_HOST_PASSWORD = 'your_app_password'  # Use App Password for Gmail, not login password
+
+# Password Reset Timeout (in seconds)
+# 3600 seconds = 1 hour
+PASSWORD_RESET_TIMEOUT = 3600
