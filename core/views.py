@@ -66,6 +66,7 @@ def dashboard_view(request):
         if inc.frequency == 'Monthly': yearly_amt = val * 12
         elif inc.frequency == 'Yearly': yearly_amt = val
         elif inc.frequency == 'Quarterly': yearly_amt = val * 4
+        elif inc.frequency == 'Half-Yearly': yearly_amt = val * 2
         
         income_cats[inc.type] = income_cats.get(inc.type, 0) + yearly_amt
         current_year_income += yearly_amt
@@ -141,6 +142,8 @@ def dashboard_view(request):
             total_monthly_income += val / 12
         elif inc.frequency == 'Quarterly':
             total_monthly_income += val / 3
+        elif inc.frequency == 'Half-Yearly':
+            total_monthly_income += val / 6
             
     # Expense is transactional, so we filter by current month.
     current_month_expenses = Expense.objects.filter(user=user, date__year=today.year, date__month=today.month)
@@ -251,13 +254,16 @@ def income_view(request):
         val = float(inc.amount)
         if inc.frequency == 'Monthly': monthly_total += val
         elif inc.frequency == 'Yearly': monthly_total += val / 12
+        elif inc.frequency == 'Quarterly': monthly_total += val / 3
+        elif inc.frequency == 'Half-Yearly': monthly_total += val / 6
         
     context = {
         'incomes': incomes,
-        'monthly_total': monthly_total,
-        'yearly_total': monthly_total * 12,
+        'monthly_total': round(monthly_total, 2),
+        'yearly_total': round(monthly_total * 12, 2),
         'active_count': active_incomes.count(),
-        'inactive_count': incomes.count() - active_incomes.count()
+        'inactive_count': incomes.count() - active_incomes.count(),
+        'income_types': [c[0] for c in Income.INCOME_TYPE_CHOICES]
     }
     return render(request, 'income.html', context)
 
@@ -406,6 +412,7 @@ def expense_view(request):
         'yearly_pie_values': yearly_pie_values,
         'monthly_pie_labels': monthly_pie_labels,
         'monthly_pie_values': monthly_pie_values,
+        'expense_categories': [c[1] for c in Expense.EXPENSE_CATEGORY_CHOICES],
     }
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -485,7 +492,11 @@ def insurance_view(request):
         )
         
     insurance_list = Insurance.objects.filter(user=user)
-    return render(request, 'insurance.html', {'insurance_list': insurance_list})
+    context = {
+        'insurance_list': insurance_list,
+        'insurance_types': [c[0] for c in Insurance.INSURANCE_TYPE_CHOICES]
+    }
+    return render(request, 'insurance.html', context)
 
 @login_required
 def loans_view(request):
@@ -555,7 +566,7 @@ def loans_view(request):
         loan_list.append(loan)
         
 
-    loan_types = ['Home', 'Car', 'Bike', 'Personal', 'Education', 'Other']
+    loan_types = [c[0] for c in Loan.LOAN_TYPE_CHOICES]
 
     context = {
         'loans': loan_list,

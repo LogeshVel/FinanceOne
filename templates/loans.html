@@ -151,13 +151,26 @@
 
             <div>
                 <label class="block text-[#90adcb] text-xs font-medium mb-1">Loan Type</label>
-                <select name="loan_type" required
-                    class="w-full bg-[#101922] border border-[#223649] rounded p-2 text-white text-sm focus:outline-none focus:border-[#0d7ff2] transition-colors">
-                    <option value="">Select Type</option>
-                    {% for type in loan_types %}
-                    <option value="{{ type }}">{{ type }}</option>
-                    {% endfor %}
-                </select>
+                <div class="relative" id="loanTypeCombobox">
+                    <input type="text" id="loanTypeSearch"
+                        class="w-full bg-[#101922] border border-[#223649] rounded p-2 text-white text-sm focus:outline-none focus:border-[#0d7ff2] transition-colors"
+                        placeholder="Select Type..." autocomplete="off">
+                    <input type="hidden" name="loan_type" id="loanTypeHidden">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#90adcb]">
+                        <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                    </div>
+
+                    <!-- Dropdown Options -->
+                    <div id="loanTypeList"
+                        class="hidden absolute z-50 w-full mt-1 bg-[#1b2733] border border-[#223649] rounded-md shadow-xl max-h-48 overflow-y-auto">
+                        {% for type in loan_types %}
+                        <div class="loan-option px-3 py-2 hover:bg-[#223649] cursor-pointer text-white text-sm transition-colors border-b border-[#223649]/50 last:border-0"
+                            data-value="{{ type }}">
+                            {{ type }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -308,6 +321,51 @@
 
                 window.history.pushState({}, '', url);
                 updateLoans(url);
+            });
+        }
+
+        // Loan Combobox Logic
+        const combobox = document.getElementById('loanTypeCombobox');
+        if (combobox) {
+            const searchInput = document.getElementById('loanTypeSearch');
+            const hiddenInput = document.getElementById('loanTypeHidden');
+            const list = document.getElementById('loanTypeList');
+            const options = document.querySelectorAll('.loan-option');
+
+            // Show/Filter
+            searchInput.addEventListener('focus', () => {
+                list.classList.remove('hidden');
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const filter = e.target.value.toLowerCase();
+                list.classList.remove('hidden');
+
+                options.forEach(option => {
+                    const text = option.textContent.trim().toLowerCase();
+                    if (text.includes(filter)) {
+                        option.classList.remove('hidden');
+                    } else {
+                        option.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Select
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.getAttribute('data-value');
+                    searchInput.value = value;
+                    hiddenInput.value = value;
+                    list.classList.add('hidden');
+                });
+            });
+
+            // Outside Click
+            document.addEventListener('click', (e) => {
+                if (!combobox.contains(e.target)) {
+                    list.classList.add('hidden');
+                }
             });
         }
     });

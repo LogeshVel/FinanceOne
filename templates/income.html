@@ -133,23 +133,37 @@
                     required placeholder="e.g. Salary">
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 relative" id="incomeTypeCombobox">
                     <label class="text-[#90adcb] text-sm">Type</label>
-                    <select name="type"
-                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
-                        <option value="Salary">Salary</option>
-                        <option value="Freelance">Freelance</option>
-                        <option value="Investment">Investment</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <div class="relative">
+                        <input type="text" id="incomeTypeSearch"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            placeholder="Select Type..." autocomplete="off">
+                        <input type="hidden" name="type" id="incomeTypeHidden">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#90adcb]">
+                            <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                        </div>
+
+                        <!-- Dropdown Options -->
+                        <div id="incomeTypeList"
+                            class="hidden absolute z-50 w-full mt-1 bg-[#1b2733] border border-[#223649] rounded-md shadow-xl max-h-48 overflow-y-auto">
+                            {% for type in income_types %}
+                            <div class="income-option px-3 py-2 hover:bg-[#223649] cursor-pointer text-white text-sm transition-colors border-b border-[#223649]/50 last:border-0"
+                                data-value="{{ type }}">
+                                {{ type }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-[#90adcb] text-sm">Frequency</label>
                     <select name="frequency"
                         class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
                         <option value="Monthly">Monthly</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Half-Yearly">Half-Yearly</option>
                         <option value="Yearly">Yearly</option>
-                        <option value="One-time">One-time</option>
                     </select>
                 </div>
             </div>
@@ -170,4 +184,52 @@
         </form>
     </div>
 </dialog>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const combobox = document.getElementById('incomeTypeCombobox');
+        const searchInput = document.getElementById('incomeTypeSearch');
+        const hiddenInput = document.getElementById('incomeTypeHidden');
+        const list = document.getElementById('incomeTypeList');
+        const options = document.querySelectorAll('.income-option');
+
+        // Show/Filter
+        searchInput.addEventListener('focus', () => {
+            // Reset filter on focus if empty or show all
+            list.classList.remove('hidden');
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const filter = e.target.value.toLowerCase();
+            list.classList.remove('hidden');
+            let hasVisible = false;
+
+            options.forEach(option => {
+                const text = option.textContent.trim().toLowerCase();
+                if (text.includes(filter)) {
+                    option.classList.remove('hidden');
+                    hasVisible = true;
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        });
+
+        // Select
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.getAttribute('data-value');
+                searchInput.value = value;
+                hiddenInput.value = value;
+                list.classList.add('hidden');
+            });
+        });
+
+        // Outside Click
+        document.addEventListener('click', (e) => {
+            if (!combobox.contains(e.target)) {
+                list.classList.add('hidden');
+            }
+        });
+    });
+</script>
 {% endblock %}

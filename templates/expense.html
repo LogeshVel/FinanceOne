@@ -467,6 +467,53 @@
                 });
             }
         });
+
+        // Expense Combobox Logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const combobox = document.getElementById('expenseCategoryCombobox');
+            if (combobox) {
+                const searchInput = document.getElementById('expenseCategorySearch');
+                const hiddenInput = document.getElementById('expenseCategoryHidden');
+                const list = document.getElementById('expenseCategoryList');
+                const options = document.querySelectorAll('.expense-option');
+
+                // Show/Filter
+                searchInput.addEventListener('focus', () => {
+                    list.classList.remove('hidden');
+                });
+
+                searchInput.addEventListener('input', (e) => {
+                    const filter = e.target.value.toLowerCase();
+                    list.classList.remove('hidden');
+
+                    options.forEach(option => {
+                        const text = option.textContent.trim().toLowerCase();
+                        if (text.includes(filter)) {
+                            option.classList.remove('hidden');
+                        } else {
+                            option.classList.add('hidden');
+                        }
+                    });
+                });
+
+                // Select
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const value = option.getAttribute('data-value');
+                        searchInput.value = value;
+                        hiddenInput.value = value;
+                        list.classList.add('hidden');
+                    });
+                });
+
+                // Outside Click
+                document.addEventListener('click', (e) => {
+                    if (!combobox.contains(e.target)) {
+                        list.classList.add('hidden');
+                    }
+                });
+            }
+        });
     </script>
     <!-- Expense Modal -->
     <dialog id="expenseModal" class="bg-transparent backdrop:bg-black/50 p-0 w-full max-w-lg">
@@ -491,15 +538,26 @@
                 <div>
                     <label
                         class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Category</label>
-                    <select name="category"
-                        class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
-                        <option value="Groceries">Groceries</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Entertainment">Entertainment</option>
-                        <option value="Dining">Dining</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <div class="relative" id="expenseCategoryCombobox">
+                        <input type="text" id="expenseCategorySearch"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            placeholder="Select Category..." autocomplete="off">
+                        <input type="hidden" name="category" id="expenseCategoryHidden">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#90adcb]">
+                            <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                        </div>
+
+                        <!-- Dropdown Options -->
+                        <div id="expenseCategoryList"
+                            class="hidden absolute z-50 w-full mt-1 bg-[#1b2733] border border-[#223649] rounded-md shadow-xl max-h-48 overflow-y-auto">
+                            {% for category in expense_categories %}
+                            <div class="expense-option px-3 py-2 hover:bg-[#223649] cursor-pointer text-white text-sm transition-colors border-b border-[#223649]/50 last:border-0"
+                                data-value="{{ category }}">
+                                {{ category }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-[#90adcb] uppercase tracking-wider mb-2">Date</label>

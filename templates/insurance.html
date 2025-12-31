@@ -44,11 +44,11 @@
                     <span class="text-white font-medium">{{ ins.policy_number }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-[#90adcb]">Premium</span>
+                    <span class="text-[#90adcb]">Premium Amount</span>
                     <span class="text-white font-medium">₹{{ ins.premium|intcomma }}/{{ ins.premium_frequency }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-[#90adcb]">Renewal</span>
+                    <span class="text-[#90adcb]">Renewal Date</span>
                     <span class="text-white font-medium">{{ ins.renewal_date }}</span>
                 </div>
             </div>
@@ -76,13 +76,26 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2">
                     <label class="text-[#90adcb] text-sm">Type</label>
-                    <select name="type"
-                        class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]">
-                        <option>Health</option>
-                        <option>Life</option>
-                        <option>Vehicle</option>
-                        <option>Home</option>
-                    </select>
+                    <div class="relative" id="insTypeCombobox">
+                        <input type="text" id="insTypeSearch"
+                            class="w-full bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
+                            placeholder="Select Type..." autocomplete="off">
+                        <input type="hidden" name="type" id="insTypeHidden">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#90adcb]">
+                            <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                        </div>
+
+                        <!-- Dropdown Options -->
+                        <div id="insTypeList"
+                            class="hidden absolute z-50 w-full mt-1 bg-[#1b2733] border border-[#223649] rounded-md shadow-xl max-h-48 overflow-y-auto">
+                            {% for type in insurance_types %}
+                            <div class="ins-option px-3 py-2 hover:bg-[#223649] cursor-pointer text-white text-sm transition-colors border-b border-[#223649]/50 last:border-0"
+                                data-value="{{ type }}">
+                                {{ type }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-[#90adcb] text-sm">Policy No.</label>
@@ -92,7 +105,7 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <label class="text-[#90adcb] text-sm">Premium</label>
+                <label class="text-[#90adcb] text-sm">Premium Amount</label>
                 <input type="number" step="0.01" name="premium"
                     class="bg-[#101922] border border-[#223649] text-white rounded-md p-2 focus:outline-none focus:border-[#0d7ff2]"
                     required>
@@ -112,4 +125,51 @@
         </form>
     </div>
 </dialog>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const combobox = document.getElementById('insTypeCombobox');
+        const searchInput = document.getElementById('insTypeSearch');
+        const hiddenInput = document.getElementById('insTypeHidden');
+        const list = document.getElementById('insTypeList');
+        const options = document.querySelectorAll('.ins-option');
+
+        // Show/Filter
+        searchInput.addEventListener('focus', () => {
+            list.classList.remove('hidden');
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const filter = e.target.value.toLowerCase();
+            list.classList.remove('hidden');
+
+            options.forEach(option => {
+                const text = option.textContent.trim().toLowerCase();
+                if (text.includes(filter)) {
+                    option.classList.remove('hidden');
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        });
+
+        // Select
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.getAttribute('data-value');
+                searchInput.value = value;
+                hiddenInput.value = value;
+                list.classList.add('hidden');
+            });
+        });
+
+        // Outside Click
+        document.addEventListener('click', (e) => {
+            if (!combobox.contains(e.target)) {
+                list.classList.add('hidden');
+            }
+        });
+    });
+</script>
+
 {% endblock %}

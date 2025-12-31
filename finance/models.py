@@ -4,7 +4,23 @@ from django.contrib.auth.models import User
 class Income(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     source_name = models.CharField(max_length=255)
-    type = models.CharField(max_length=100)
+    INCOME_TYPE_CHOICES = [
+        ('Salary', 'Salary'),
+        ('Freelance', 'Freelance'),
+        ('Commission', 'Commission'),
+        ('Business', 'Business'),
+        ('Partnership', 'Partnership'),
+        ('Bonus', 'Bonus'),
+        ('Interest', 'Interest'),
+        ('Dividend', 'Dividend'),
+        ('Capital Gains', 'Capital Gains'),
+        ('Rental', 'Rental'),
+        ('Franchise', 'Franchise'),
+        ('Sponsorship', 'Sponsorship'),
+        ('Pension', 'Pension'),
+        ('Other', 'Other'),
+    ]
+    type = models.CharField(max_length=100, choices=INCOME_TYPE_CHOICES)
     frequency = models.CharField(max_length=50)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, default='Active')
@@ -17,7 +33,31 @@ class Income(models.Model):
 class Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=255)
-    category = models.CharField(max_length=100)
+    EXPENSE_CATEGORY_CHOICES = [
+        ('Rent', 'Rent'),
+        ('EMI', 'EMI'),
+        ('Electricity', 'Electricity'),
+        ('Water', 'Water'),
+        ('Gas', 'Gas'),
+        ('Internet', 'Internet'),
+        ('Mobile Recharge', 'Mobile recharge'),
+        ('DTH/Cable', 'DTH/Cable'),
+        ('Groceries', 'Groceries'),
+        ('Dining Out', 'Dining Out'),
+        ('Transportation', 'Transportation'),
+        ('Shopping', 'Clothing or Lifestyle or Shopping'),
+        ('Insurance', 'Insurance'),
+        ('Medicine', 'Medicine'),
+        ('Tuition Fees', 'Tuition fees'),
+        ('Entertainment', 'Entertainment'),
+        ('Electronics', 'Electronics'),
+        ('Furniture', 'Furniture'),
+        ('Membership', 'Membership'),
+        ('Emergency', 'Emergency Expense'),
+        ('One-time', 'One-time Purchases'),
+        ('Miscellaneous', 'Miscellaneous'),
+    ]
+    category = models.CharField(max_length=100, choices=EXPENSE_CATEGORY_CHOICES)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
     payment_method = models.CharField(max_length=50, blank=True, null=True)
@@ -42,7 +82,16 @@ class Asset(models.Model):
 class Insurance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     provider = models.CharField(max_length=255)
-    type = models.CharField(max_length=50)
+    INSURANCE_TYPE_CHOICES = [
+        ('Life', 'Life'),
+        ('Health', 'Health/Medical'),
+        ('Term', 'Term'),
+        ('Vehicle', 'Vehicle'),
+        ('Home', 'Home/Property'),
+        ('Travel', 'Travel'),
+        ('Business', 'Business'),
+    ]
+    type = models.CharField(max_length=50, choices=INSURANCE_TYPE_CHOICES)
     policy_number = models.CharField(max_length=100)
     premium = models.DecimalField(max_digits=10, decimal_places=2)
     premium_frequency = models.CharField(max_length=20, default='Monthly')
@@ -74,7 +123,15 @@ class Loan(models.Model):
     tenure = models.IntegerField(help_text="Tenure in years")
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
     start_date = models.DateField(default=None, null=True, blank=True)
-    loan_type = models.CharField(max_length=50)  # bike, car, home, personal, education, other
+    LOAN_TYPE_CHOICES = [
+        ('Home', 'Home'),
+        ('Personal', 'Personal'),
+        ('Vehicle', 'Vehicle'),
+        ('Agriculture', 'Agriculture'),
+        ('Gold', 'Gold & Asset-Backed'),
+        ('Other', 'Other'),
+    ]
+    loan_type = models.CharField(max_length=50, choices=LOAN_TYPE_CHOICES)
     is_property_loan = models.BooleanField(default=False)
     resale_value = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
